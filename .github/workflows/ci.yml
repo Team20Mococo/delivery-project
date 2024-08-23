@@ -1,0 +1,32 @@
+name: Build in Pull Request trigger
+
+on:
+  pull_request:
+    branches: [ "develop" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v1
+        with:
+          java-version: 17
+
+      - name: Gradle execute permission for gradlew # Gradle로 빌드할 것이며, 빌드를 하기위한 gradlew에 권한을 부여
+        run: chmod +x ./gradlew
+        shell: bash # 돌아가는 환경을 bash shell로 하겠다.
+
+      - name: Set YML
+        run: |
+          mkdir -p src/main/resources
+          echo "${{ secrets.APPLICATION_SECRET_YML }}" | base64 --decode > src/main/resources/application-secret.yml
+          find src
+
+      - name: Build with Gradle
+        run: ./gradlew build --exclude-task test
+        shell: bash
