@@ -10,4 +10,6 @@ import java.util.UUID;
 @NoRepositoryBean
 public interface StoreRepository extends Repository<Store, UUID> {
     Optional<Store> findById(UUID storeId);
+
+    Store save(Store store);
 }
