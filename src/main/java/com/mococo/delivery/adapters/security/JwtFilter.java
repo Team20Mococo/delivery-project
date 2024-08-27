@@ -79,7 +79,7 @@ public class JwtFilter extends OncePerRequestFilter {
 				.verifyWith(key)
 				.build().parseSignedClaims(token);
 
-			String username = claimsJws.getPayload().get("sub").toString();
+			String username = claimsJws.getPayload().getSubject();
 			// username 이 null 아니고 유저가 존재.
 			return username != null && userService.verifyUser(username);
 		} catch (SecurityException | MalformedJwtException e) {
