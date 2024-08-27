@@ -51,7 +51,7 @@ public class JwtFilter extends OncePerRequestFilter {
 		String path = request.getRequestURI();
 		if (path.endsWith("sign-up") || path.endsWith("log-in")) {
 			log.info("인증/인가가 필요없는 요청입니다.");
-			return;
+			filterChain.doFilter(request, response);
 		}
 
 		// 토큰 추출 및 인증

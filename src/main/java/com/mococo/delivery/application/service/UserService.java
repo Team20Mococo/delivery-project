@@ -7,6 +7,8 @@ import javax.crypto.SecretKey;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -20,11 +22,13 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
 public class UserService {
 
+	private static final Logger log = LoggerFactory.getLogger(UserService.class);
 	private final UserRepository userRepository;
 
 	private final PasswordEncoder passwordEncoder;
@@ -51,11 +55,13 @@ public class UserService {
 	}
 
 	public Boolean login(HttpServletResponse response, LoginRequestDto request) {
-		String username = request.getUsername();
+
 		String password = request.getPassword();
-		User user = userRepository.findByUsername(username)
+		User user = userRepository.findByUsername(request.getUsername())
 			.orElseThrow(EntityNotFoundException::new);
-		if (user.getPassword().equals(passwordEncoder.encode(password))) {
+
+		//넘겨 받은 패스워드를 암호화 했을때 기존 DB 데이터 일치
+		if (passwordEncoder.matches(password, user.getPassword())) {
 			setAuthorities(response, user);
 			return true;
 		}
@@ -84,7 +90,7 @@ public class UserService {
 		return userRepository.save(
 			User.builder()
 				.username(request.getUsername())
-				.password(request.getPassword())
+				.password(passwordEncoder.encode(request.getPassword()))
 				.isPublic(request.getIsPublic())
 				.build()
 		).isPresent();
