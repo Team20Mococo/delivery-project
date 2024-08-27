@@ -39,6 +39,7 @@ public class StoreServiceTest {
 
     @BeforeEach
     void setUp() {
+        MockitoAnnotations.openMocks(this);
         storeRequestDto = StoreRequestDto.builder()
                 .username("testuser")
                 .name("Test Store")
@@ -47,8 +48,8 @@ public class StoreServiceTest {
                 .description("Store Description")
                 .build();
 
-        User owner = User.builder().username(storeRequestDto.getUsername()).build();
-        Category category = Category.builder().name(storeRequestDto.getCategory()).build();
+        owner = User.builder().username(storeRequestDto.getUsername()).build();
+        category = Category.builder().name(storeRequestDto.getCategory()).build();
     }
 
     @Test

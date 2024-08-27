@@ -12,6 +12,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import java.util.Optional;
 
@@ -27,6 +28,7 @@ public class CategoryServiceTest {
 
     @BeforeEach
     void setUp() {
+        MockitoAnnotations.openMocks(this);
         categoryRequestDto = CategoryRequestDto.builder()
                 .name("TEXMEX")
                 .build();
@@ -36,12 +38,7 @@ public class CategoryServiceTest {
     void addCategory_success() {
         // given
         when(categoryRepository.findByName(categoryRequestDto.getName())).thenReturn(Optional.empty());
-        when(categoryRepository.save(any(Category.class))).thenAnswer(invocation -> {
-            Category category = invocation.getArgument(0);
-            return Category.builder()
-                    .name(category.getName())
-                    .build();
-        });
+        when(categoryRepository.save(any(Category.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         // when
         AddCategoryResponseDto response = categoryService.addCategory(categoryRequestDto);
