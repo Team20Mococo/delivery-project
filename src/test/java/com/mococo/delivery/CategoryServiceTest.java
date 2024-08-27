@@ -38,12 +38,7 @@ public class CategoryServiceTest {
     void addCategory_success() {
         // given
         when(categoryRepository.findByName(categoryRequestDto.getName())).thenReturn(Optional.empty());
-        when(categoryRepository.save(any(Category.class))).thenAnswer(invocation -> {
-            Category category = invocation.getArgument(0);
-            return Category.builder()
-                    .name(category.getName())
-                    .build();
-        });
+        when(categoryRepository.save(any(Category.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         // when
         AddCategoryResponseDto response = categoryService.addCategory(categoryRequestDto);
