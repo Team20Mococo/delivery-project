@@ -22,7 +22,6 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
@@ -79,7 +78,7 @@ public class UserService {
 		return BEARER_PREFIX +
 			Jwts.builder()
 				.subject(user.getUsername()) // 사용자 식별자값(ID)
-				.claim(AUTHORIZATION_KEY, user.getRole()) // 사용자 권한
+				.claim(AUTHORIZATION_KEY, user.getRole().getAuthority()) // 사용자 권한
 				.expiration(new Date(date.getTime() + TOKEN_TIME)) // 만료 시간
 				.issuedAt(date) // 발급일
 				.signWith(key, Jwts.SIG.HS512)
