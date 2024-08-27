@@ -1,16 +1,24 @@
 package com.mococo.delivery.adapters.security;
 
 import java.io.IOException;
+import java.util.regex.Pattern;
 
 import javax.crypto.SecretKey;
 
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.mococo.delivery.application.service.UserService;
+import com.mococo.delivery.domain.model.enumeration.UserRole;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -21,10 +29,6 @@ import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -49,6 +53,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
 		// 인증 필요 여부 확인
 		String path = request.getRequestURI();
+		HttpMethod method = HttpMethod.valueOf(request.getMethod());
 		if (path.endsWith("sign-up") || path.endsWith("log-in")) {
 			log.info("인증/인가가 필요없는 요청입니다.");
 			filterChain.doFilter(request, response);
@@ -58,6 +63,16 @@ public class JwtFilter extends OncePerRequestFilter {
 		String token = getJwtFromHeader(request);
 		if (token == null || !validateToken(token)) {
 			response.setStatus(HttpStatus.UNAUTHORIZED.value());
+			return;
+		}
+
+		// 권한 확인
+		UserRole role = extractUserRole(token);
+		boolean hasRole = RoleAccessLevel.of(role).getEndpointList().stream()
+			.filter(endPoint -> Pattern.matches(endPoint.getEndPointName(), path))
+			.anyMatch(endPoint -> endPoint.getMethod().equals(method));
+		if (!hasRole) {
+			response.setStatus(HttpStatus.FORBIDDEN.value());
 			return;
 		}
 
@@ -98,6 +113,15 @@ public class JwtFilter extends OncePerRequestFilter {
 			log.error("JWT claims is empty, 잘못된 JWT 토큰 입니다.");
 		}
 		return null;
+	}
+
+	public UserRole extractUserRole(String token) {
+		SecretKey key = Keys.hmacShaKeyFor(Decoders.BASE64URL.decode(secretKey));
+		Jws<Claims> claimsJws = Jwts.parser()
+			.verifyWith(key)
+			.build().parseSignedClaims(token);
+		String authority = claimsJws.getPayload().get("auth").toString();
+		return UserRole.of(authority);
 	}
 
 }
