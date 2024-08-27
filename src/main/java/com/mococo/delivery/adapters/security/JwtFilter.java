@@ -4,11 +4,6 @@ import java.io.IOException;
 
 import javax.crypto.SecretKey;
 
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -25,6 +20,10 @@ import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -80,7 +79,7 @@ public class JwtFilter extends OncePerRequestFilter {
 				.verifyWith(key)
 				.build().parseSignedClaims(token);
 
-			String username = claimsJws.getPayload().get("username").toString();
+			String username = claimsJws.getPayload().get("sub").toString();
 			// username 이 null 아니고 유저가 존재.
 			return username != null && userService.verifyUser(username);
 		} catch (SecurityException | MalformedJwtException e) {
