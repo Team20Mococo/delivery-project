@@ -4,11 +4,6 @@ import java.io.IOException;
 
 import javax.crypto.SecretKey;
 
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -25,6 +20,11 @@ import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SignatureException;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -74,16 +74,21 @@ public class JwtFilter extends OncePerRequestFilter {
 
 	// 토큰 검증
 	public boolean validateToken(String token) {
+		String username = extractUsername(token);
+		if (username != null) {
+			return userService.verifyUser(username);
+		}
+		return false;
+	}
+
+	public String extractUsername(String token) {
 		try {
 			SecretKey key = Keys.hmacShaKeyFor(Decoders.BASE64URL.decode(secretKey));
 			Jws<Claims> claimsJws = Jwts.parser()
 				.verifyWith(key)
 				.build().parseSignedClaims(token);
-
-			String username = claimsJws.getPayload().getSubject();
-			// username 이 null 아니고 유저가 존재.
-			return username != null && userService.verifyUser(username);
-		} catch (SecurityException | MalformedJwtException e) {
+			return claimsJws.getPayload().getSubject();
+		} catch (SignatureException | SecurityException | MalformedJwtException e) {
 			log.error("Invalid JWT signature, 유효하지 않는 JWT 서명 입니다.");
 		} catch (ExpiredJwtException e) {
 			log.error("Expired JWT token, 만료된 JWT token 입니다.");
@@ -92,6 +97,7 @@ public class JwtFilter extends OncePerRequestFilter {
 		} catch (IllegalArgumentException e) {
 			log.error("JWT claims is empty, 잘못된 JWT 토큰 입니다.");
 		}
-		return false;
+		return null;
 	}
+
 }
