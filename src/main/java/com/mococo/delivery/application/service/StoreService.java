@@ -1,6 +1,5 @@
 package com.mococo.delivery.application.service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -72,8 +71,8 @@ public class StoreService {
 			.category(savedStore.getCategory().getName())
 			.notice(savedStore.getNotice())
 			.description(savedStore.getDescription())
-			.createdAt(LocalDateTime.now())
-			.createdBy("system")
+			.createdAt(savedStore.getCreatedAt())
+			.createdBy(savedStore.getCreatedBy())
 			.build();
 
 		return AddStoreResponseDto.builder().store(storeResponseDto).build();
