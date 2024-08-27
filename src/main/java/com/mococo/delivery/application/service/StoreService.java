@@ -16,6 +16,7 @@ import com.mococo.delivery.application.dto.store.AddStoreResponseDto;
 import com.mococo.delivery.application.dto.store.StoreListResponseDto;
 import com.mococo.delivery.application.dto.store.StoreRequestDto;
 import com.mococo.delivery.application.dto.store.StoreResponseDto;
+import com.mococo.delivery.application.dto.store.StoreSimpleResponseDto;
 import com.mococo.delivery.domain.model.Category;
 import com.mococo.delivery.domain.model.Store;
 import com.mococo.delivery.domain.model.User;
@@ -116,8 +117,8 @@ public class StoreService {
 			}
 		}
 
-		List<StoreResponseDto> storeList = storePage.getContent().stream()
-			.map(store -> StoreResponseDto.builder()
+		List<StoreSimpleResponseDto> storeList = storePage.getContent().stream()
+			.map(store -> StoreSimpleResponseDto.builder()
 				.storeId(store.getId())
 				.name(store.getName())
 				.category(store.getCategory().getName())

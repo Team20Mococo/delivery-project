@@ -10,6 +10,6 @@ import lombok.Getter;
 @Getter
 @Builder
 public class StoreListResponseDto {
-	private List<StoreResponseDto> storeList;
+	private List<StoreSimpleResponseDto> storeList;
 	private PageInfoDto pageInfo;
 }
