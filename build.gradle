@@ -26,6 +26,7 @@ repositories {
 dependencies {
 	//인증 위한 의존성
 	implementation 'io.jsonwebtoken:jjwt:0.12.6'
+	implementation 'org.springframework.security:spring-security-crypto'
 
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
