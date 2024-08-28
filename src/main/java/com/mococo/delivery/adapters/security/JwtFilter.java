@@ -70,7 +70,7 @@ public class JwtFilter extends OncePerRequestFilter {
 		UserRole role = extractUserRole(token);
 		boolean hasRole = RoleAccessLevel.of(role).getEndpointList().stream()
 			.filter(endPoint -> Pattern.matches(endPoint.getEndPointName(), path))
-			.anyMatch(endPoint -> endPoint.getMethod().equals(method));
+			.anyMatch(endPoint -> endPoint.getMethod().toString().equals(method.toString()));
 		if (!hasRole) {
 			response.setStatus(HttpStatus.FORBIDDEN.value());
 			return;
