@@ -14,124 +14,124 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public enum RoleAccessLevel {
-	MASTER(UserRole.MASTER, List.of(
+	MASTER(UserRole.ROLE_MASTER, List.of(
 		// 유저
-		EndPoint.of(GET, "/api/v1/admin/users"),
-		EndPoint.of(GET, "/api/v1/admin/users/**"),
+		EndPoint.of(GET, "^/api/v1/admin/users$"),
+		EndPoint.of(GET, "^/api/v1/admin/users/.*"),
 		// 상품
-		EndPoint.of(GET, "/api/v1/products"),
-		EndPoint.of(GET, "/api/v1/products/**"),
-		EndPoint.of(PUT, "/api/v1/products/**"),
-		EndPoint.of(DELETE, "/api/v1/products/**"),
+		EndPoint.of(GET, "^/api/v1/products$"),
+		EndPoint.of(GET, "^/api/v1/products/.*"),
+		EndPoint.of(PUT, "^/api/v1/products/.*"),
+		EndPoint.of(DELETE, "^/api/v1/products/.*"),
 		// order
-		EndPoint.of(GET, "/api/v1/orders/**"),
-		EndPoint.of(GET, "/api/v1/owner/orders"),
-		EndPoint.of(GET, "/api/v1/consumer/orders"),
-		EndPoint.of(PATCH, "/api/v1/orders/**"),
-		EndPoint.of(DELETE, "/api/v1/orders/**"),
+		EndPoint.of(GET, "^/api/v1/orders/.*"),
+		EndPoint.of(GET, "^/api/v1/owner/orders$"),
+		EndPoint.of(GET, "^/api/v1/consumer/orders$"),
+		EndPoint.of(PATCH, "^/api/v1/orders/.*"),
+		EndPoint.of(DELETE, "^/api/v1/orders/.*"),
 		// payment
-		EndPoint.of(GET, "/api/v1/payments"),
+		EndPoint.of(GET, "^/api/v1/payments$"),
 		// delivery
-		EndPoint.of(GET, "/api/v1/deliveries"),
+		EndPoint.of(GET, "^/api/v1/deliveries$"),
 		// store
-		EndPoint.of(GET, "/api/v1/admin/stores"),
-		EndPoint.of(GET, "/api/v1/admin/stores/**"),
-		EndPoint.of(POST, "/api/v1/admin/stores"),
+		EndPoint.of(GET, "^/api/v1/admin/stores$"),
+		EndPoint.of(GET, "^/api/v1/admin/stores/.*"),
+		EndPoint.of(POST, "^/api/v1/admin/stores$"),
 		//category
-		EndPoint.of(POST, "/api/v1/admin/categories"),
-		EndPoint.of(GET, "/api/v1/admin/categories"),
-		EndPoint.of(PUT, "/api/v1/admin/categories/**"),
-		EndPoint.of(DELETE, "/api/v1/admin/categories/**"),
+		EndPoint.of(POST, "^/api/v1/admin/categories$"),
+		EndPoint.of(GET, "^/api/v1/admin/categories$"),
+		EndPoint.of(PUT, "^/api/v1/admin/categories/.*"),
+		EndPoint.of(DELETE, "^/api/v1/admin/categories/.*"),
 		//ai
-		EndPoint.of(GET, "/api/v1/admin/ai")
+		EndPoint.of(GET, "^/api/v1/admin/ai$")
 	)),
-	MANAGER(UserRole.MANAGER, List.of(
+	MANAGER(UserRole.ROLE_MANAGER, List.of(
 		// 유저
-		EndPoint.of(GET, "/api/v1/admin/users"),
-		EndPoint.of(GET, "/api/v1/admin/users/**"),
+		EndPoint.of(GET, "^/api/v1/admin/users$"),
+		EndPoint.of(GET, "^/api/v1/admin/users/.*"),
 		// 상품
-		EndPoint.of(GET, "/api/v1/products"),
-		EndPoint.of(GET, "/api/v1/products/**"),
-		EndPoint.of(PUT, "/api/v1/products/**"),
-		EndPoint.of(DELETE, "/api/v1/products/**"),
+		EndPoint.of(GET, "^/api/v1/products$"),
+		EndPoint.of(GET, "^/api/v1/products/.*"),
+		EndPoint.of(PUT, "^/api/v1/products/.*"),
+		EndPoint.of(DELETE, "^/api/v1/products/.*"),
 		// order
-		EndPoint.of(GET, "/api/v1/orders/**"),
-		EndPoint.of(GET, "/api/v1/owner/orders"),
-		EndPoint.of(GET, "/api/v1/consumer/orders"),
-		EndPoint.of(PATCH, "/api/v1/orders/**"),
-		EndPoint.of(DELETE, "/api/v1/orders/**"),
+		EndPoint.of(GET, "^/api/v1/orders/.*"),
+		EndPoint.of(GET, "^/api/v1/owner/orders$"),
+		EndPoint.of(GET, "^/api/v1/consumer/orders$"),
+		EndPoint.of(PATCH, "^/api/v1/orders/.*"),
+		EndPoint.of(DELETE, "^/api/v1/orders/.*"),
 		// payment
-		EndPoint.of(GET, "/api/v1/payments"),
+		EndPoint.of(GET, "^/api/v1/payments$"),
 		// delivery
-		EndPoint.of(GET, "/api/v1/deliveries"),
+		EndPoint.of(GET, "^/api/v1/deliveries$"),
 		// store
-		EndPoint.of(GET, "/api/v1/admin/stores"),
-		EndPoint.of(GET, "/api/v1/admin/stores/**"),
-		EndPoint.of(POST, "/api/v1/admin/stores"),
+		EndPoint.of(GET, "^/api/v1/admin/stores$"),
+		EndPoint.of(GET, "^/api/v1/admin/stores/.*"),
+		EndPoint.of(POST, "^/api/v1/admin/stores$"),
 		//category
-		EndPoint.of(POST, "/api/v1/admin/categories"),
-		EndPoint.of(GET, "/api/v1/admin/categories"),
-		EndPoint.of(PUT, "/api/v1/admin/categories/**"),
-		EndPoint.of(DELETE, "/api/v1/admin/categories/**"),
+		EndPoint.of(POST, "^/api/v1/admin/categories$"),
+		EndPoint.of(GET, "^/api/v1/admin/categories$"),
+		EndPoint.of(PUT, "^/api/v1/admin/categories/.*"),
+		EndPoint.of(DELETE, "^/api/v1/admin/categories/.*"),
 		//ai
-		EndPoint.of(GET, "/api/v1/admin/ai")
+		EndPoint.of(GET, "^/api/v1/admin/ai$")
 	)),
-	OWNER(UserRole.OWNER, List.of(
+	OWNER(UserRole.ROLE_OWNER, List.of(
 		// 유저
-		EndPoint.of(POST, "/api/v1/users/log-out"),
-		EndPoint.of(PUT, "/api/v1/users/**"),
-		EndPoint.of(DELETE, "/api/v1/users/**"),
+		EndPoint.of(POST, "^/api/v1/users/log-out$"),
+		EndPoint.of(PUT, "^/api/v1/users/.*"),
+		EndPoint.of(DELETE, "^/api/v1/users/.*"),
 		// 상품
-		EndPoint.of(POST, "/api/v1/products"),
-		EndPoint.of(GET, "/api/v1/products"),
-		EndPoint.of(GET, "/api/v1/products/**"),
-		EndPoint.of(PUT, "/api/v1/products/**"),
-		EndPoint.of(DELETE, "/api/v1/products/**"),
+		EndPoint.of(POST, "^/api/v1/products$"),
+		EndPoint.of(GET, "^/api/v1/products$"),
+		EndPoint.of(GET, "^/api/v1/products/.*"),
+		EndPoint.of(PUT, "^/api/v1/products/.*"),
+		EndPoint.of(DELETE, "^/api/v1/products/.*"),
 		// order
-		EndPoint.of(GET, "/api/v1/orders/**"),
-		EndPoint.of(GET, "/api/v1/owner/orders"),
-		EndPoint.of(PATCH, "/api/v1/orders/**"),
-		EndPoint.of(DELETE, "/api/v1/orders/**"),
+		EndPoint.of(GET, "^/api/v1/orders/.*"),
+		EndPoint.of(GET, "^/api/v1/owner/orders$"),
+		EndPoint.of(PATCH, "^/api/v1/orders/.*"),
+		EndPoint.of(DELETE, "^/api/v1/orders/.*"),
 		// payment
-		EndPoint.of(POST, "/api/v1/payments"),
-		EndPoint.of(GET, "/api/v1/payments"),
-		EndPoint.of(GET, "/api/v1/payments/**"),
-		EndPoint.of(PUT, "/api/v1/payments/**"),
-		EndPoint.of(DELETE, "/api/v1/payments/**"),
+		EndPoint.of(POST, "^/api/v1/payments$"),
+		EndPoint.of(GET, "^/api/v1/payments$"),
+		EndPoint.of(GET, "^/api/v1/payments/.*"),
+		EndPoint.of(PUT, "^/api/v1/payments/.*"),
+		EndPoint.of(DELETE, "^/api/v1/payments/.*"),
 		// delivery
-		EndPoint.of(POST, "/api/v1/deliveries"),
-		EndPoint.of(GET, "/api/v1/deliveries"),
-		EndPoint.of(PUT, "/api/v1/deliveries/**"),
-		EndPoint.of(DELETE, "/api/v1/deliveries/**"),
+		EndPoint.of(POST, "^/api/v1/deliveries$"),
+		EndPoint.of(GET, "^/api/v1/deliveries$"),
+		EndPoint.of(PUT, "^/api/v1/deliveries/.*"),
+		EndPoint.of(DELETE, "^/api/v1/deliveries/.*"),
 		// store
-		EndPoint.of(GET, "/api/v1/owner/stores/**"),
-		EndPoint.of(PUT, "/api/v1/owner/stores/**"),
-		EndPoint.of(PATCH, "/api/v1/owner/stores/**"),
-		EndPoint.of(DELETE, "/api/v1/owner/stores/**"),
+		EndPoint.of(GET, "^/api/v1/owner/stores/.*"),
+		EndPoint.of(PUT, "^/api/v1/owner/stores/.*"),
+		EndPoint.of(PATCH, "^/api/v1/owner/stores/.*"),
+		EndPoint.of(DELETE, "^/api/v1/owner/stores/.*"),
 		//category
 		//ai
-		EndPoint.of(POST, "/api/v1/owner/ai")
+		EndPoint.of(POST, "^/api/v1/owner/ai$")
 	)),
-	CUSTOMER(UserRole.CUSTOMER, List.of(
+	CUSTOMER(UserRole.ROLE_CUSTOMER, List.of(
 		// 유저
-		EndPoint.of(POST, "/api/v1/users/log-out"),
-		EndPoint.of(PUT, "/api/v1/users/**"),
-		EndPoint.of(DELETE, "/api/v1/users/**"),
+		EndPoint.of(POST, "^/api/v1/users/log-out$"),
+		EndPoint.of(PUT, "^/api/v1/users/.*"),
+		EndPoint.of(DELETE, "^/api/v1/users/.*"),
 		// 상품
-		EndPoint.of(GET, "/api/v1/products"),
-		EndPoint.of(GET, "/api/v1/products/**"),
+		EndPoint.of(GET, "^/api/v1/products$"),
+		EndPoint.of(GET, "^/api/v1/products/.*"),
 		// order
-		EndPoint.of(POST, "/api/v1/orders"),
-		EndPoint.of(GET, "/api/v1/orders/**"),
-		EndPoint.of(GET, "/api/v1/consumer/orders"),
-		EndPoint.of(DELETE, "/api/v1/orders/**"),
+		EndPoint.of(POST, "^/api/v1/orders$"),
+		EndPoint.of(GET, "^/api/v1/orders/.*"),
+		EndPoint.of(GET, "^/api/v1/consumer/orders$"),
+		EndPoint.of(DELETE, "^/api/v1/orders/.*"),
 		// payment
-		EndPoint.of(GET, "/api/v1/payments"),
+		EndPoint.of(GET, "^/api/v1/payments$"),
 		// delivery
-		EndPoint.of(GET, "/api/v1/deliveries"),
+		EndPoint.of(GET, "^/api/v1/deliveries$"),
 		// store
-		EndPoint.of(GET, "/api/v1/customer/stores"),
-		EndPoint.of(GET, "/api/v1/customer/stores/**")
+		EndPoint.of(GET, "^/api/v1/customer/stores$"),
+		EndPoint.of(GET, "^/api/v1/customer/stores/.*")
 		//category
 		//ai
 	));

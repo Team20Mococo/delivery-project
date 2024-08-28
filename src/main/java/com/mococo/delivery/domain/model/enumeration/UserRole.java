@@ -8,10 +8,10 @@ import lombok.Getter;
 
 @Getter
 public enum UserRole {
-	MASTER(Authority.MASTER),
-	MANAGER(Authority.MANAGER),
-	OWNER(Authority.OWNER),
-	CUSTOMER(Authority.CUSTOMER);
+	ROLE_MASTER(Authority.MASTER),
+	ROLE_MANAGER(Authority.MANAGER),
+	ROLE_OWNER(Authority.OWNER),
+	ROLE_CUSTOMER(Authority.CUSTOMER);
 
 	private final String authority;
 
@@ -20,7 +20,7 @@ public enum UserRole {
 	}
 
 	public static class Authority {
-		public static final String MASTER = "ROLE_MASER";
+		public static final String MASTER = "ROLE_MASTER";
 		public static final String MANAGER = "ROLE_MANAGER";
 		public static final String OWNER = "ROLE_OWNER";
 		public static final String CUSTOMER = "ROLE_CUSTOMER";
