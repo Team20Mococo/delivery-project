@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import com.mococo.delivery.application.dto.store.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -19,10 +20,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
-import com.mococo.delivery.application.dto.store.AddStoreResponseDto;
-import com.mococo.delivery.application.dto.store.StoreListResponseDto;
-import com.mococo.delivery.application.dto.store.StoreRequestDto;
-import com.mococo.delivery.application.dto.store.StoreResponseDto;
 import com.mococo.delivery.application.service.StoreService;
 import com.mococo.delivery.domain.model.Category;
 import com.mococo.delivery.domain.model.Store;
@@ -194,8 +191,8 @@ public class StoreServiceTest {
 		assertNotNull(response);
 		assertEquals(2, response.getStoreList().size());
 
-		StoreResponseDto firstStore = response.getStoreList().get(0);
-		StoreResponseDto secondStore = response.getStoreList().get(1);
+		StoreSimpleResponseDto firstStore = response.getStoreList().get(0);
+		StoreSimpleResponseDto secondStore = response.getStoreList().get(1);
 
 		assertEquals("든킨드나쓰", firstStore.getName());
 		assertEquals("김밥천국", secondStore.getName());
@@ -219,8 +216,8 @@ public class StoreServiceTest {
 		assertNotNull(response);
 		assertEquals(2, response.getStoreList().size());
 
-		StoreResponseDto firstStore = response.getStoreList().get(0);
-		StoreResponseDto secondStore = response.getStoreList().get(1);
+		StoreSimpleResponseDto firstStore = response.getStoreList().get(0);
+		StoreSimpleResponseDto secondStore = response.getStoreList().get(1);
 
 		assertEquals("김밥천국", firstStore.getName());
 		assertEquals("든킨드나쓰", secondStore.getName());
@@ -244,7 +241,7 @@ public class StoreServiceTest {
 		assertNotNull(response);
 		assertEquals(1, response.getStoreList().size());
 
-		StoreResponseDto firstStore = response.getStoreList().get(0);
+		StoreSimpleResponseDto firstStore = response.getStoreList().get(0);
 		assertEquals("김밥천국", firstStore.getName());
 
 		verify(storeRepository, times(1)).findByOperationStatusTrue(pageable);
@@ -267,7 +264,7 @@ public class StoreServiceTest {
 		assertNotNull(response);
 		assertEquals(1, response.getStoreList().size());
 
-		StoreResponseDto firstStore = response.getStoreList().get(0);
+		StoreSimpleResponseDto firstStore = response.getStoreList().get(0);
 		assertEquals("김밥천국", firstStore.getName());
 
 		verify(storeRepository, times(1)).findByNameContainingIgnoreCase("김밥", pageable);
@@ -290,7 +287,7 @@ public class StoreServiceTest {
 		assertNotNull(response);
 		assertEquals(1, response.getStoreList().size());
 
-		StoreResponseDto firstStore = response.getStoreList().get(0);
+		StoreSimpleResponseDto firstStore = response.getStoreList().get(0);
 		assertEquals("김밥천국", firstStore.getName());
 
 		verify(storeRepository, times(1)).findByNameContainingIgnoreCaseAndOperationStatusTrue("김밥", pageable);
