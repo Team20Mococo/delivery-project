@@ -1,6 +1,7 @@
 package com.mococo.delivery.application.service;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
@@ -104,18 +105,16 @@ public class ProductService {
 			.build();
 	}
 
-	// @Transactional(readOnly = true)
-	// public ProductSimpleResponseDto getProductById(UUID productId) {
-	// 	Product product = productRepository.findById(productId)
-	// 		.orElseThrow(() -> new IllegalArgumentException("유효하지 않은 상품 ID입니다."));
-	//
-	// 	ProductSimpleResponseDto response = ProductSimpleResponseDto.builder()
-	// 		.productId(product.getId())
-	// 		.name(product.getName())
-	// 		.description(product.getDescription())
-	// 		.stock(product.getStock())
-	// 		.build();
-	//
-	// 	return response;
-	// }
+	@Transactional(readOnly = true)
+	public ProductSimpleResponseDto getProductById(UUID productId) {
+		Product product = productRepository.findById(productId)
+			.orElseThrow(() -> new IllegalArgumentException("유효하지 않은 상품 ID입니다."));
+
+		return ProductSimpleResponseDto.builder()
+			.productId(product.getId())
+			.name(product.getName())
+			.description(product.getDescription())
+			.stock(product.getStock())
+			.build();
+	}
 }
