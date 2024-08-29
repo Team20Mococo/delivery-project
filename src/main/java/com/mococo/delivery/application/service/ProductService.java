@@ -16,6 +16,7 @@ import com.mococo.delivery.application.dto.product.ProductListResponseDto;
 import com.mococo.delivery.application.dto.product.ProductRequestDto;
 import com.mococo.delivery.application.dto.product.ProductResponseDto;
 import com.mococo.delivery.application.dto.product.ProductSimpleResponseDto;
+import com.mococo.delivery.application.dto.product.ProductUpdateRequestDto;
 import com.mococo.delivery.domain.model.Product;
 import com.mococo.delivery.domain.model.Store;
 import com.mococo.delivery.domain.repository.ProductRepository;
@@ -115,6 +116,34 @@ public class ProductService {
 			.name(product.getName())
 			.description(product.getDescription())
 			.stock(product.getStock())
+			.build();
+	}
+
+	@Transactional
+	public ProductResponseDto updateProduct(UUID productId, ProductUpdateRequestDto request) {
+		Product product = productRepository.findById(productId)
+			.orElseThrow(() -> new IllegalArgumentException("유효하지 않은 상품 ID입니다."));
+
+		Product updatedProduct = product.toBuilder()
+			.name(request.getName() != null ? request.getName() : product.getName())
+			.price(request.getPrice() != null ? request.getPrice() : product.getPrice())
+			.description(request.getDescription() != null ? request.getDescription() : product.getDescription())
+			.createdAt(product.getCreatedAt())
+			.createdBy(product.getCreatedBy())
+			.build();
+
+		updatedProduct = productRepository.save(updatedProduct);
+
+		return ProductResponseDto.builder()
+			.storeId(updatedProduct.getStore().getId())
+			.productId(updatedProduct.getId())
+			.name(updatedProduct.getName())
+			.price(updatedProduct.getPrice())
+			.description(updatedProduct.getDescription())
+			.stock(updatedProduct.getStock())
+			.isPublic(updatedProduct.getIsPublic())
+			.createdAt(updatedProduct.getCreatedAt())
+			.createdBy(updatedProduct.getCreatedBy())
 			.build();
 	}
 }
