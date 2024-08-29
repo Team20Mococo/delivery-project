@@ -2,21 +2,10 @@ package com.mococo.delivery.adapters.controller;
 
 import java.util.UUID;
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import com.mococo.delivery.application.dto.product.*;
+import org.springframework.web.bind.annotation.*;
 
 import com.mococo.delivery.application.dto.SuccessResponseDto;
-import com.mococo.delivery.application.dto.product.ProductListResponseDto;
-import com.mococo.delivery.application.dto.product.ProductRequestDto;
-import com.mococo.delivery.application.dto.product.ProductResponseDto;
-import com.mococo.delivery.application.dto.product.ProductSimpleResponseDto;
-import com.mococo.delivery.application.dto.product.ProductUpdateRequestDto;
 import com.mococo.delivery.application.service.ProductService;
 
 import lombok.RequiredArgsConstructor;
@@ -71,6 +60,14 @@ public class ProductController {
 		@PathVariable UUID productId,
 		@RequestBody ProductUpdateRequestDto request) {
 		ProductResponseDto response = productService.updateProduct(productId, request);
+		return new SuccessResponseDto<>("성공했습니다.", response);
+	}
+
+	@PatchMapping("/{productId}/stock")
+	public SuccessResponseDto<ProductResponseDto> updateProductStock(
+			@PathVariable UUID productId,
+			@RequestBody UpdateStockRequestDto request) {
+		ProductResponseDto response = productService.updateProductStock(productId, request);
 		return new SuccessResponseDto<>("성공했습니다.", response);
 	}
 
