@@ -10,6 +10,7 @@ import lombok.Getter;
 public class ProductSimpleResponseDto {
 	private UUID productId;
 	private String name;
-	private Double price;
+	private Integer price;
 	private String description;
+	private Integer stock;
 }

@@ -10,6 +10,6 @@ import lombok.Data;
 @Data
 @Builder
 public class ProductListResponseDto {
-	private List<ProductResponseDto> productList;
+	private List<ProductSimpleResponseDto> productList;
 	private PageInfoDto pageInfo;
 }

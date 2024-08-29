@@ -14,6 +14,7 @@ import com.mococo.delivery.application.dto.PageInfoDto;
 import com.mococo.delivery.application.dto.product.ProductListResponseDto;
 import com.mococo.delivery.application.dto.product.ProductRequestDto;
 import com.mococo.delivery.application.dto.product.ProductResponseDto;
+import com.mococo.delivery.application.dto.product.ProductSimpleResponseDto;
 import com.mococo.delivery.domain.model.Product;
 import com.mococo.delivery.domain.model.Store;
 import com.mococo.delivery.domain.repository.ProductRepository;
@@ -79,12 +80,13 @@ public class ProductService {
 			}
 		}
 
-		List<ProductResponseDto> productList = productPage.getContent().stream()
-			.map(product -> ProductResponseDto.builder()
+		List<ProductSimpleResponseDto> productList = productPage.getContent().stream()
+			.map(product -> ProductSimpleResponseDto.builder()
 				.productId(product.getId())
 				.name(product.getName())
 				.price(product.getPrice())
 				.description(product.getDescription())
+				.stock(product.getStock())
 				.build())
 			.collect(Collectors.toList());
 
@@ -101,4 +103,19 @@ public class ProductService {
 			.pageInfo(pageInfo)
 			.build();
 	}
+
+	// @Transactional(readOnly = true)
+	// public ProductSimpleResponseDto getProductById(UUID productId) {
+	// 	Product product = productRepository.findById(productId)
+	// 		.orElseThrow(() -> new IllegalArgumentException("유효하지 않은 상품 ID입니다."));
+	//
+	// 	ProductSimpleResponseDto response = ProductSimpleResponseDto.builder()
+	// 		.productId(product.getId())
+	// 		.name(product.getName())
+	// 		.description(product.getDescription())
+	// 		.stock(product.getStock())
+	// 		.build();
+	//
+	// 	return response;
+	// }
 }

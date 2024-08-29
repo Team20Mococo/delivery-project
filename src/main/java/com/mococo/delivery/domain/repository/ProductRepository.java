@@ -1,5 +1,6 @@
 package com.mococo.delivery.domain.repository;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.domain.Page;
@@ -20,4 +21,6 @@ public interface ProductRepository extends Repository<Product, UUID> {
 	Page<Product> findByIsPublicTrue(Pageable pageable);
 
 	Page<Product> findAll(Pageable pageable);
+
+	Optional<Product> findById(UUID productId);
 }
