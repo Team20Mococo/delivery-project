@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import com.mococo.delivery.application.dto.product.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -12,11 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.mococo.delivery.application.dto.PageInfoDto;
-import com.mococo.delivery.application.dto.product.ProductListResponseDto;
-import com.mococo.delivery.application.dto.product.ProductRequestDto;
-import com.mococo.delivery.application.dto.product.ProductResponseDto;
-import com.mococo.delivery.application.dto.product.ProductSimpleResponseDto;
-import com.mococo.delivery.application.dto.product.ProductUpdateRequestDto;
 import com.mococo.delivery.domain.model.Product;
 import com.mococo.delivery.domain.model.Store;
 import com.mococo.delivery.domain.repository.ProductRepository;
@@ -128,8 +124,6 @@ public class ProductService {
 			.name(request.getName() != null ? request.getName() : product.getName())
 			.price(request.getPrice() != null ? request.getPrice() : product.getPrice())
 			.description(request.getDescription() != null ? request.getDescription() : product.getDescription())
-			.createdAt(product.getCreatedAt())
-			.createdBy(product.getCreatedBy())
 			.build();
 
 		updatedProduct = productRepository.save(updatedProduct);
@@ -145,5 +139,29 @@ public class ProductService {
 			.createdAt(updatedProduct.getCreatedAt())
 			.createdBy(updatedProduct.getCreatedBy())
 			.build();
+	}
+
+	@Transactional
+	public ProductResponseDto updateProductStock(UUID productId, UpdateStockRequestDto request) {
+		Product product = productRepository.findById(productId)
+				.orElseThrow(() -> new IllegalArgumentException("유효하지 않은 상품 ID입니다."));
+
+		Product updatedProduct = product.toBuilder()
+				.stock(request.getStock())
+				.build();
+
+		updatedProduct = productRepository.save(updatedProduct);
+
+		return ProductResponseDto.builder()
+				.storeId(updatedProduct.getStore().getId())
+				.productId(updatedProduct.getId())
+				.name(updatedProduct.getName())
+				.price(updatedProduct.getPrice())
+				.description(updatedProduct.getDescription())
+				.stock(updatedProduct.getStock())
+				.isPublic(updatedProduct.getIsPublic())
+				.createdAt(updatedProduct.getCreatedAt())
+				.createdBy(updatedProduct.getCreatedBy())
+				.build();
 	}
 }

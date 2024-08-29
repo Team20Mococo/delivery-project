@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import com.mococo.delivery.application.dto.product.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -20,11 +21,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
-import com.mococo.delivery.application.dto.product.ProductListResponseDto;
-import com.mococo.delivery.application.dto.product.ProductRequestDto;
-import com.mococo.delivery.application.dto.product.ProductResponseDto;
-import com.mococo.delivery.application.dto.product.ProductSimpleResponseDto;
-import com.mococo.delivery.application.dto.product.ProductUpdateRequestDto;
 import com.mococo.delivery.application.service.ProductService;
 import com.mococo.delivery.domain.model.Product;
 import com.mococo.delivery.domain.model.Store;
@@ -47,6 +43,7 @@ public class ProductServiceTest {
 	private Product product1;
 	private Product product2;
 	private ProductUpdateRequestDto updateRequest;
+	private UpdateStockRequestDto stockRequest;
 
 	@BeforeEach
 	void setUp() {
@@ -65,28 +62,35 @@ public class ProductServiceTest {
 			.build();
 
 		product1 = Product.builder()
-			.id(UUID.randomUUID())
-			.name("Product 1")
-			.price(100)
-			.description("Description 1")
-			.stock(10)
-			.isPublic(true)
-			.build();
+				.id(UUID.randomUUID())
+				.name("Test Product")
+				.price(100)
+				.description("Test Description")
+				.stock(10)
+				.isPublic(true)
+				.store(store)  // store 필드 초기화
+				.build();
 
 		product2 = Product.builder()
-			.id(UUID.randomUUID())
-			.name("Product 2")
-			.price(200)
-			.description("Description 2")
-			.stock(5)
-			.isPublic(false)
-			.build();
+				.id(UUID.randomUUID())
+				.name("Test Product2")
+				.price(200)
+				.description("Test Description2")
+				.stock(20)
+				.isPublic(true)
+				.store(store)  // store 필드 초기화
+				.build();
+
 
 		updateRequest = ProductUpdateRequestDto.builder()
 			.name("Updated Product")
 			.price(150)
 			.description("Updated Description")
 			.build();
+
+		stockRequest = UpdateStockRequestDto.builder()
+				.stock(20)
+				.build();
 	}
 
 	@Test
@@ -266,12 +270,9 @@ public class ProductServiceTest {
 			Product savedProduct = invocation.getArgument(0);
 			return savedProduct.toBuilder()
 				.id(product1.getId())
+				.store(savedProduct.getStore())
 				.stock(product1.getStock())
 				.isPublic(product1.getIsPublic())
-				.createdAt(product1.getCreatedAt())
-				.createdBy(product1.getCreatedBy())
-				.updatedAt(LocalDateTime.now())
-				.updatedBy("admin_update")
 				.build();
 		});
 
@@ -302,6 +303,52 @@ public class ProductServiceTest {
 		// When & Then
 		IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
 			productService.updateProduct(invalidId, updateRequest);
+		});
+
+		assertEquals("유효하지 않은 상품 ID입니다.", exception.getMessage());
+		verify(productRepository, times(1)).findById(invalidId);
+		verify(productRepository, never()).save(any(Product.class));
+	}
+
+	@Test
+	void updateProductStock_success() {
+		// Given
+		when(productRepository.findById(product1.getId())).thenReturn(Optional.of(product1));
+		when(productRepository.save(any(Product.class))).thenAnswer(invocation -> {
+			Product savedProduct = invocation.getArgument(0);
+			return savedProduct.toBuilder()
+					.id(product1.getId()) // 유지해야 할 필드
+					.name(product1.getName())
+					.price(product1.getPrice())
+					.description(product1.getDescription())
+					.stock(stockRequest.getStock()) // 변경된 필드
+					.isPublic(product1.getIsPublic())
+					.store(product1.getStore())
+					.build();
+		});
+
+		// When
+		ProductResponseDto response = productService.updateProductStock(product1.getId(), stockRequest);
+
+		// Then
+		assertNotNull(response);
+		assertEquals(product1.getId(), response.getProductId());
+		assertEquals(stockRequest.getStock(), response.getStock());
+
+
+		verify(productRepository, times(1)).findById(product1.getId());
+		verify(productRepository, times(1)).save(any(Product.class));
+	}
+
+	@Test
+	void updateProductStock_invalidId_throwsException() {
+		// Given
+		UUID invalidId = UUID.randomUUID();
+		when(productRepository.findById(invalidId)).thenReturn(Optional.empty());
+
+		// When & Then
+		IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+			productService.updateProductStock(invalidId, stockRequest);
 		});
 
 		assertEquals("유효하지 않은 상품 ID입니다.", exception.getMessage());
