@@ -22,6 +22,7 @@ import org.springframework.data.domain.Sort;
 import com.mococo.delivery.application.dto.product.ProductListResponseDto;
 import com.mococo.delivery.application.dto.product.ProductRequestDto;
 import com.mococo.delivery.application.dto.product.ProductResponseDto;
+import com.mococo.delivery.application.dto.product.ProductSimpleResponseDto;
 import com.mococo.delivery.application.service.ProductService;
 import com.mococo.delivery.domain.model.Product;
 import com.mococo.delivery.domain.model.Store;
@@ -145,7 +146,7 @@ public class ProductServiceTest {
 		assertNotNull(response);
 		assertEquals(2, response.getProductList().size());
 
-		ProductResponseDto firstProduct = response.getProductList().get(0);
+		ProductSimpleResponseDto firstProduct = response.getProductList().get(0);
 		assertEquals(product1.getId(), firstProduct.getProductId());
 		assertEquals(product1.getName(), firstProduct.getName());
 		assertEquals(product1.getPrice(), firstProduct.getPrice());
@@ -172,7 +173,7 @@ public class ProductServiceTest {
 		assertNotNull(response);
 		assertEquals(1, response.getProductList().size());
 
-		ProductResponseDto firstProduct = response.getProductList().get(0);
+		ProductSimpleResponseDto firstProduct = response.getProductList().get(0);
 		assertEquals(product1.getId(), firstProduct.getProductId());
 		assertEquals(product1.getName(), firstProduct.getName());
 		assertEquals(product1.getPrice(), firstProduct.getPrice());
@@ -198,12 +199,53 @@ public class ProductServiceTest {
 		assertNotNull(response);
 		assertEquals(1, response.getProductList().size());
 
-		ProductResponseDto firstProduct = response.getProductList().get(0);
+		ProductSimpleResponseDto firstProduct = response.getProductList().get(0);
 		assertEquals(product1.getId(), firstProduct.getProductId());
 		assertEquals(product1.getName(), firstProduct.getName());
 		assertEquals(product1.getPrice(), firstProduct.getPrice());
 		assertEquals(product1.getDescription(), firstProduct.getDescription());
 
 		verify(productRepository, times(1)).findByIsPublicTrue(pageable);
+	}
+
+	@Test
+	void getProductById_success() {
+		// Given
+		UUID productId = UUID.randomUUID();
+		Product product = Product.builder()
+			.id(productId)
+			.name("Product 1")
+			.price(100)
+			.description("Description 1")
+			.stock(10)
+			.isPublic(true)
+			.build();
+
+		when(productRepository.findById(productId)).thenReturn(Optional.of(product));
+
+		// When
+		ProductSimpleResponseDto response = productService.getProductById(productId);
+
+		// Then
+		assertNotNull(response);
+		assertEquals(productId, response.getProductId());
+		assertEquals("Product 1", response.getName());
+
+		verify(productRepository, times(1)).findById(productId);
+	}
+
+	@Test
+	void getProductById_productNotFound_throwsException() {
+		// Given
+		UUID productId = UUID.randomUUID();
+		when(productRepository.findById(productId)).thenReturn(Optional.empty());
+
+		// When & Then
+		IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+			productService.getProductById(productId);
+		});
+
+		assertEquals("유효하지 않은 상품 ID입니다.", exception.getMessage());
+		verify(productRepository, times(1)).findById(productId);
 	}
 }
