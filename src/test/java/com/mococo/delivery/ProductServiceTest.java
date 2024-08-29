@@ -44,6 +44,7 @@ public class ProductServiceTest {
 	private Product product2;
 	private ProductUpdateRequestDto updateRequest;
 	private UpdateStockRequestDto stockRequest;
+	private UpdateProductPublicStatusRequestDto publicStatusRequest;
 
 	@BeforeEach
 	void setUp() {
@@ -81,7 +82,6 @@ public class ProductServiceTest {
 				.store(store)  // store 필드 초기화
 				.build();
 
-
 		updateRequest = ProductUpdateRequestDto.builder()
 			.name("Updated Product")
 			.price(150)
@@ -90,6 +90,10 @@ public class ProductServiceTest {
 
 		stockRequest = UpdateStockRequestDto.builder()
 				.stock(20)
+				.build();
+
+		publicStatusRequest = UpdateProductPublicStatusRequestDto.builder()
+				.isPublic(false)
 				.build();
 	}
 
@@ -349,6 +353,56 @@ public class ProductServiceTest {
 		// When & Then
 		IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
 			productService.updateProductStock(invalidId, stockRequest);
+		});
+
+		assertEquals("유효하지 않은 상품 ID입니다.", exception.getMessage());
+		verify(productRepository, times(1)).findById(invalidId);
+		verify(productRepository, never()).save(any(Product.class));
+	}
+
+	@Test
+	void updateProductPublicStatus_success() {
+		// Given
+		when(productRepository.findById(product1.getId())).thenReturn(Optional.of(product1));
+		when(productRepository.save(any(Product.class))).thenAnswer(invocation -> {
+			Product savedProduct = invocation.getArgument(0);
+			return savedProduct.toBuilder()
+					.id(product1.getId()) // 유지해야 할 필드
+					.name(product1.getName())
+					.price(product1.getPrice())
+					.description(product1.getDescription())
+					.stock(product1.getStock())
+					.isPublic(publicStatusRequest.getIsPublic()) // 변경된 필드
+					.store(product1.getStore())
+					.build();
+		});
+
+		// When
+		ProductResponseDto response = productService.updateProductPublicStatus(product1.getId(), publicStatusRequest);
+
+		// Then
+		assertNotNull(response);
+		assertEquals(product1.getId(), response.getProductId());
+		assertEquals(publicStatusRequest.getIsPublic(), response.getIsPublic()); // isPublic should be updated
+
+		// Verify created and updated fields
+		assertEquals(product1.getCreatedAt(), response.getCreatedAt()); // Original creation time should be the same
+		assertEquals(product1.getCreatedBy(), response.getCreatedBy()); // Original creator should be the same
+		assertEquals(product1.getStore().getId(), response.getStoreId());
+
+		verify(productRepository, times(1)).findById(product1.getId());
+		verify(productRepository, times(1)).save(any(Product.class));
+	}
+
+	@Test
+	void updateProductPublicStatus_invalidId_throwsException() {
+		// Given
+		UUID invalidId = UUID.randomUUID();
+		when(productRepository.findById(invalidId)).thenReturn(Optional.empty());
+
+		// When & Then
+		IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+			productService.updateProductPublicStatus(invalidId, publicStatusRequest);
 		});
 
 		assertEquals("유효하지 않은 상품 ID입니다.", exception.getMessage());

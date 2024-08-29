@@ -71,4 +71,12 @@ public class ProductController {
 		return new SuccessResponseDto<>("성공했습니다.", response);
 	}
 
+	@PatchMapping("/{productId}/is-public")
+	public SuccessResponseDto<ProductResponseDto> updateProductPublicStatus(
+			@PathVariable UUID productId,
+			@RequestBody UpdateProductPublicStatusRequestDto request) {
+		ProductResponseDto response = productService.updateProductPublicStatus(productId, request);
+		return new SuccessResponseDto<>("성공했습니다.", response);
+	}
+
 }

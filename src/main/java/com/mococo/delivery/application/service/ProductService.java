@@ -164,4 +164,28 @@ public class ProductService {
 				.createdBy(updatedProduct.getCreatedBy())
 				.build();
 	}
+
+	@Transactional
+	public ProductResponseDto updateProductPublicStatus(UUID productId, UpdateProductPublicStatusRequestDto request) {
+		Product product = productRepository.findById(productId)
+				.orElseThrow(() -> new IllegalArgumentException("유효하지 않은 상품 ID입니다."));
+
+		Product updatedProduct = product.toBuilder()
+				.isPublic(request.getIsPublic())
+				.build();
+
+		updatedProduct = productRepository.save(updatedProduct);
+
+		return ProductResponseDto.builder()
+				.storeId(updatedProduct.getStore().getId())
+				.productId(updatedProduct.getId())
+				.name(updatedProduct.getName())
+				.price(updatedProduct.getPrice())
+				.description(updatedProduct.getDescription())
+				.stock(updatedProduct.getStock())
+				.isPublic(updatedProduct.getIsPublic())
+				.createdAt(updatedProduct.getCreatedAt())
+				.createdBy(updatedProduct.getCreatedBy())
+				.build();
+	}
 }
