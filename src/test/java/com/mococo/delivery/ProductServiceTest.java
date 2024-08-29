@@ -3,6 +3,7 @@ package com.mococo.delivery;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -23,6 +24,7 @@ import com.mococo.delivery.application.dto.product.ProductListResponseDto;
 import com.mococo.delivery.application.dto.product.ProductRequestDto;
 import com.mococo.delivery.application.dto.product.ProductResponseDto;
 import com.mococo.delivery.application.dto.product.ProductSimpleResponseDto;
+import com.mococo.delivery.application.dto.product.ProductUpdateRequestDto;
 import com.mococo.delivery.application.service.ProductService;
 import com.mococo.delivery.domain.model.Product;
 import com.mococo.delivery.domain.model.Store;
@@ -44,6 +46,7 @@ public class ProductServiceTest {
 	private Store store;
 	private Product product1;
 	private Product product2;
+	private ProductUpdateRequestDto updateRequest;
 
 	@BeforeEach
 	void setUp() {
@@ -77,6 +80,12 @@ public class ProductServiceTest {
 			.description("Description 2")
 			.stock(5)
 			.isPublic(false)
+			.build();
+
+		updateRequest = ProductUpdateRequestDto.builder()
+			.name("Updated Product")
+			.price(150)
+			.description("Updated Description")
 			.build();
 	}
 
@@ -247,5 +256,56 @@ public class ProductServiceTest {
 
 		assertEquals("유효하지 않은 상품 ID입니다.", exception.getMessage());
 		verify(productRepository, times(1)).findById(productId);
+	}
+
+	@Test
+	void updateProduct_success() {
+		// Given
+		when(productRepository.findById(product1.getId())).thenReturn(Optional.of(product1));
+		when(productRepository.save(any(Product.class))).thenAnswer(invocation -> {
+			Product savedProduct = invocation.getArgument(0);
+			return savedProduct.toBuilder()
+				.id(product1.getId())
+				.stock(product1.getStock())
+				.isPublic(product1.getIsPublic())
+				.createdAt(product1.getCreatedAt())
+				.createdBy(product1.getCreatedBy())
+				.updatedAt(LocalDateTime.now())
+				.updatedBy("admin_update")
+				.build();
+		});
+
+		// When
+		ProductResponseDto response = productService.updateProduct(product1.getId(), updateRequest);
+
+		// Then
+		assertNotNull(response);
+		assertEquals(product1.getId(), response.getProductId());
+		assertEquals(updateRequest.getName(), response.getName());
+		assertEquals(updateRequest.getPrice(), response.getPrice());
+		assertEquals(updateRequest.getDescription(), response.getDescription());
+		assertEquals(product1.getStock(), response.getStock());
+		assertEquals(product1.getIsPublic(), response.getIsPublic());
+
+		assertEquals(product1.getCreatedAt(), response.getCreatedAt());
+
+		verify(productRepository, times(1)).findById(product1.getId());
+		verify(productRepository, times(1)).save(any(Product.class));
+	}
+
+	@Test
+	void updateProduct_invalidId_throwsException() {
+		// Given
+		UUID invalidId = UUID.randomUUID();
+		when(productRepository.findById(invalidId)).thenReturn(Optional.empty());
+
+		// When & Then
+		IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+			productService.updateProduct(invalidId, updateRequest);
+		});
+
+		assertEquals("유효하지 않은 상품 ID입니다.", exception.getMessage());
+		verify(productRepository, times(1)).findById(invalidId);
+		verify(productRepository, never()).save(any(Product.class));
 	}
 }
