@@ -25,6 +25,7 @@ import com.mococo.delivery.application.dto.user.SignUpRequestDto;
 import com.mococo.delivery.application.dto.user.UserListResponseDto;
 import com.mococo.delivery.application.dto.user.UserPutRequestDto;
 import com.mococo.delivery.application.dto.user.UserResponseDto;
+import com.mococo.delivery.application.dto.user.UserRolePatchRequestDto;
 import com.mococo.delivery.domain.model.User;
 import com.mococo.delivery.domain.model.enumeration.UserRole;
 import com.mococo.delivery.domain.repository.UserRepository;
@@ -106,6 +107,14 @@ public class UserService {
 		User user = userRepository.findByUsername(username)
 			.orElseThrow(EntityNotFoundException::new);
 		user.modify(requestDto.getNickname(), requestDto.getAddress(), requestDto.isPublic());
+		return UserResponseDto.of(user);
+	}
+
+	@Transactional
+	public UserResponseDto updateRole(String username, UserRolePatchRequestDto requestDto) {
+		User user = userRepository.findByUsername(username)
+			.orElseThrow(EntityNotFoundException::new);
+		user.changeRole(UserRole.of(requestDto.getRoleName()));
 		return UserResponseDto.of(user);
 	}
 

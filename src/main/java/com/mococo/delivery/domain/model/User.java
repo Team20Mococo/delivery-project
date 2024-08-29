@@ -46,6 +46,10 @@ public class User extends Auditable {
 		isPublic = newIsPublic;
 	}
 
+	public void changeRole(UserRole newRole) {
+		role = newRole;
+	}
+
 	public void delete() {
 		this.isPublic = false;
 	}
