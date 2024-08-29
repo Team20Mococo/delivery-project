@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -18,6 +19,7 @@ import com.mococo.delivery.application.dto.user.SignUpRequestDto;
 import com.mococo.delivery.application.dto.user.UserListResponseDto;
 import com.mococo.delivery.application.dto.user.UserPutRequestDto;
 import com.mococo.delivery.application.dto.user.UserResponseDto;
+import com.mococo.delivery.application.dto.user.UserRolePatchRequestDto;
 import com.mococo.delivery.application.service.UserService;
 
 import lombok.RequiredArgsConstructor;
@@ -69,5 +71,14 @@ public class UserController {
 	) {
 		return new SuccessResponseDto<>("조회 성공",
 			userService.getAllUsers(sortBy, direction, filter, page, size, searchQuery));
+	}
+
+	@PatchMapping("/admin/users/{username}")
+	public SuccessResponseDto<UserResponseDto> updateUserRole(
+		@PathVariable String username,
+		@RequestBody UserRolePatchRequestDto requestDto
+	) {
+		return new SuccessResponseDto<>("권한 변경 성공",
+			userService.updateRole(username, requestDto));
 	}
 }

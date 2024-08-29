@@ -18,8 +18,10 @@ public enum RoleAccessLevel {
 		// 유저
 		EndPoint.of(GET, "^/api/v1/admin/users$"),
 		EndPoint.of(GET, "^/api/v1/admin/users/.*"),
+		EndPoint.of(PATCH, "^/api/v1/admin/users/.*"),
 		// 상품
-		EndPoint.of(GET, "^/api/v1/products$"),
+		EndPoint.of(GET, "^/api/v1/customer/products$"),
+		EndPoint.of(GET, "^/api/v1/owner/products$"),
 		EndPoint.of(GET, "^/api/v1/products/.*"),
 		EndPoint.of(PUT, "^/api/v1/products/.*"),
 		EndPoint.of(DELETE, "^/api/v1/products/.*"),
@@ -49,8 +51,10 @@ public enum RoleAccessLevel {
 		// 유저
 		EndPoint.of(GET, "^/api/v1/admin/users$"),
 		EndPoint.of(GET, "^/api/v1/admin/users/.*"),
+		EndPoint.of(PATCH, "^/api/v1/admin/users/.*"),
 		// 상품
-		EndPoint.of(GET, "^/api/v1/products$"),
+		EndPoint.of(GET, "^/api/v1/customer/products$"),
+		EndPoint.of(GET, "^/api/v1/owner/products$"),
 		EndPoint.of(GET, "^/api/v1/products/.*"),
 		EndPoint.of(PUT, "^/api/v1/products/.*"),
 		EndPoint.of(DELETE, "^/api/v1/products/.*"),
@@ -83,7 +87,8 @@ public enum RoleAccessLevel {
 		EndPoint.of(DELETE, "^/api/v1/users/.*"),
 		// 상품
 		EndPoint.of(POST, "^/api/v1/products$"),
-		EndPoint.of(GET, "^/api/v1/products$"),
+		EndPoint.of(GET, "^/api/v1/customer/products$"),
+		EndPoint.of(GET, "^/api/v1/owner/products$"),
 		EndPoint.of(GET, "^/api/v1/products/.*"),
 		EndPoint.of(PUT, "^/api/v1/products/.*"),
 		EndPoint.of(DELETE, "^/api/v1/products/.*"),
@@ -118,7 +123,7 @@ public enum RoleAccessLevel {
 		EndPoint.of(PUT, "^/api/v1/users/.*"),
 		EndPoint.of(DELETE, "^/api/v1/users/.*"),
 		// 상품
-		EndPoint.of(GET, "^/api/v1/products$"),
+		EndPoint.of(GET, "^/api/v1/customer/products$"),
 		EndPoint.of(GET, "^/api/v1/products/.*"),
 		// order
 		EndPoint.of(POST, "^/api/v1/orders$"),
