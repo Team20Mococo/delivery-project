@@ -107,7 +107,7 @@ public class UserService {
 	@Transactional
 	public UserResponseDto updateUser(String username, UserPutRequestDto requestDto) {
 		User user = userRepository.findByUsername(username)
-			.orElseThrow(EntityNotFoundException::new);
+			.orElseThrow(UserNotFoundException::new);
 		user.modify(requestDto.getNickname(), requestDto.getAddress(), requestDto.isPublic());
 		return UserResponseDto.of(user);
 	}
@@ -115,7 +115,7 @@ public class UserService {
 	@Transactional
 	public UserResponseDto updateRole(String username, UserRolePatchRequestDto requestDto) {
 		User user = userRepository.findByUsername(username)
-			.orElseThrow(EntityNotFoundException::new);
+			.orElseThrow(UserNotFoundException::new);
 		user.changeRole(UserRole.of(requestDto.getRoleName()));
 		return UserResponseDto.of(user);
 	}
@@ -124,7 +124,7 @@ public class UserService {
 	public Boolean deleteUser(String username) {
 		log.info(username);
 		User user = userRepository.findByUsername(username)
-			.orElseThrow();
+			.orElseThrow(UserNotFoundException::new);
 
 		return userRepository.delete(user);
 	}

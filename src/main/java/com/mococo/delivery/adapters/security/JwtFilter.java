@@ -73,7 +73,7 @@ public class JwtFilter extends OncePerRequestFilter {
 			.filter(endPoint -> Pattern.matches(endPoint.getEndPointName(), path))
 			.anyMatch(endPoint -> endPoint.getMethod().toString().equals(method.toString()));
 		// 롤이 있는지 확인 및 추출한 권한과 DB 권한 일치 하는지
-		if (!hasRole || matchRole(role, token)) {
+		if (!hasRole || !matchRole(role, token)) {
 			response.setStatus(HttpStatus.FORBIDDEN.value());
 			return;
 		}
@@ -128,6 +128,6 @@ public class JwtFilter extends OncePerRequestFilter {
 
 	public boolean matchRole(UserRole givenRole, String token) {
 		UserRole realRole = userService.getUserRole(extractUsername(token));
-		return givenRole == realRole;
+		return givenRole.getAuthority().equals(realRole.getAuthority());
 	}
 }
