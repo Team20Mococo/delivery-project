@@ -133,8 +133,11 @@ public class UserService {
 		return userRepository.save(
 			User.builder()
 				.username(request.getUsername())
+				.nickname(request.getNickname())
+				.email(request.getEmail())
+				.address(request.getAddress())
 				.password(passwordEncoder.encode(request.getPassword()))
-				.isPublic(request.getIsPublic())
+				.isPublic(true)
 				.role(UserRole.ROLE_CUSTOMER)
 				.build()
 		).isPresent();
@@ -156,6 +159,11 @@ public class UserService {
 
 	public boolean verifyUser(String username) {
 		return userRepository.findByUsername(username).isPresent();
+	}
+
+	public UserRole getUserRole(String username) {
+		return userRepository.findByUsername(username)
+			.orElseThrow(UserNotFoundException::new).getRole();
 	}
 
 	private void setAuthorities(HttpServletResponse response, User user) {

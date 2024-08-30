@@ -18,6 +18,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.mococo.delivery.application.service.UserService;
+import com.mococo.delivery.domain.model.User;
 import com.mococo.delivery.domain.model.enumeration.UserRole;
 
 import io.jsonwebtoken.Claims;
@@ -71,7 +72,8 @@ public class JwtFilter extends OncePerRequestFilter {
 		boolean hasRole = RoleAccessLevel.of(role).getEndpointList().stream()
 			.filter(endPoint -> Pattern.matches(endPoint.getEndPointName(), path))
 			.anyMatch(endPoint -> endPoint.getMethod().toString().equals(method.toString()));
-		if (!hasRole) {
+		// 롤이 있는지 확인 및 추출한 권한과 DB 권한 일치 하는지
+		if (!hasRole || matchRole(role, token)) {
 			response.setStatus(HttpStatus.FORBIDDEN.value());
 			return;
 		}
@@ -124,4 +126,8 @@ public class JwtFilter extends OncePerRequestFilter {
 		return UserRole.of(authority);
 	}
 
+	public boolean matchRole(UserRole givenRole, String token) {
+		UserRole realRole = userService.getUserRole(extractUsername(token));
+		return givenRole == realRole;
+	}
 }
