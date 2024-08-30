@@ -1,10 +1,10 @@
 package com.mococo.delivery.domain.model;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 
 import com.mococo.delivery.domain.model.enumeration.OrderStatus;
+import com.mococo.delivery.domain.model.enumeration.OrderType;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -15,19 +15,23 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
+import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "p_orders")
+@Builder
 @Getter
-@Setter
-public class Order {
+@NoArgsConstructor
+@AllArgsConstructor
+@Table(name = "p_orders")
+public class Order extends Auditable {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.UUID)
+	@Column(name = "order_id")
 	private UUID orderId;
 
 	@ManyToOne
@@ -38,58 +42,29 @@ public class Order {
 	@JoinColumn(name = "store_id", nullable = false)
 	private Store store;
 
+	@Column(name = "order_type", nullable = false)
 	@Enumerated(EnumType.STRING)
-	@Column(nullable = false)
-	private OrderStatus orderStatus;
+	private OrderType type;
 
 	@Column(nullable = false)
 	private Integer totalPrice;
 
-	@Column(length = 255, nullable = false)
+	@Column(nullable = false, length = 255)
 	private String address;
 
 	@Column(columnDefinition = "TEXT")
 	private String request;
 
+	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
-	private LocalDateTime createdAt;
+	private OrderStatus orderStatus;
 
-	@Column(length = 100)
-	private String createdBy;
+	public void setOrderStatus(OrderStatus orderStatus) {
+		this.orderStatus = orderStatus;
+	}
 
-	@Column
-	private LocalDateTime updatedAt;
-
-	@Column(length = 100)
-	private String updatedBy;
-
-	@Column
-	private LocalDateTime deletedAt;
-
-	@Column(length = 100)
-	private String deletedBy;
-
-	@OneToMany(mappedBy = "order")
-	private List<OrderProduct> orderProducts;
-
-	// 배달 및 결제 관련 코드를 주석 처리합니다.
-    /*
-    @OneToOne(mappedBy = "order", cascade = CascadeType.ALL)
-    private Payment payment;
-
-    @OneToOne(mappedBy = "order", cascade = CascadeType.ALL)
-    private Delivery delivery;
-    */
-
-	// 주문 취소 로직
-	public void cancelOrder() {
-		if (this.orderStatus == OrderStatus.READY &&
-			LocalDateTime.now().isBefore(this.createdAt.plusMinutes(5))) {
-			this.orderStatus = OrderStatus.CANCELLED;
-			this.deletedAt = LocalDateTime.now();
-			this.deletedBy = this.user.getUsername();
-		} else {
-			throw new IllegalStateException("주문은 5분 이내에만 취소할 수 있습니다.");
-		}
+	public Order withCreatedAt(LocalDateTime createdAt) {
+		this.setCreatedAt(createdAt);
+		return this;
 	}
 }

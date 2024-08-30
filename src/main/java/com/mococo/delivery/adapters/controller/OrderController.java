@@ -1,9 +1,10 @@
 package com.mococo.delivery.adapters.controller;
 
-import java.util.List;
 import java.util.UUID;
 
-import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -15,49 +16,77 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.mococo.delivery.application.dto.SuccessResponseDto;
+import com.mococo.delivery.application.dto.order.OrderRequestDto;
+import com.mococo.delivery.application.dto.order.OrderResponseDto;
+import com.mococo.delivery.application.dto.order.OrderStatusUpdateDto;
 import com.mococo.delivery.application.service.OrderService;
-import com.mococo.delivery.domain.model.Order;
-import com.mococo.delivery.domain.model.enumeration.OrderStatus;
+
+import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/v1/orders")
+@RequestMapping("/api/v1")
+@RequiredArgsConstructor
 public class OrderController {
 
 	private final OrderService orderService;
 
-	public OrderController(OrderService orderService) {
-		this.orderService = orderService;
+	// 주문 생성
+	@PostMapping("/orders")
+	public SuccessResponseDto<OrderResponseDto> createOrder(@RequestBody OrderRequestDto request) {
+		OrderResponseDto response = orderService.createOrder(request, request.getUsername());
+		return new SuccessResponseDto<>("주문이 생성되었습니다.", response);
 	}
 
-	@PostMapping
-	public ResponseEntity<SuccessResponseDto<Order>> createOrder(@RequestBody Order order) {
-		Order createdOrder = orderService.createOrder(order);
-		return ResponseEntity.ok(new SuccessResponseDto<>("주문이 성공적으로 생성되었습니다.", createdOrder));
+	// 주문 단건 조회
+	@GetMapping("/orders/{orderId}")
+	public SuccessResponseDto<OrderResponseDto> getOrderById(@PathVariable UUID orderId,
+		@RequestParam String username) {
+		OrderResponseDto response = orderService.getOrderById(orderId, username);
+		return new SuccessResponseDto<>("주문 조회에 성공했습니다.", response);
 	}
 
-	@GetMapping("/{orderId}")
-	public ResponseEntity<SuccessResponseDto<Order>> getOrderById(@PathVariable UUID orderId) {
-		Order order = orderService.getOrderById(orderId);
-		return ResponseEntity.ok(new SuccessResponseDto<>("주문을 성공적으로 조회했습니다.", order));
+	// 주문 목록 조회 (점주)
+	@GetMapping("/owner/orders")
+	public SuccessResponseDto<Page<OrderResponseDto>> getOrderListByOwner(
+		@RequestParam(required = false) String sortBy,
+		@RequestParam(defaultValue = "asc") String direction,
+		@RequestParam(defaultValue = "0") int page,
+		@RequestParam(defaultValue = "10") int size,
+		@RequestParam(required = false) String searchQuery
+	) {
+		PageRequest pageRequest = PageRequest.of(page, Math.min(size, 50),
+			Sort.by(Sort.Direction.fromString(direction), sortBy != null ? sortBy : "createdAt"));
+		Page<OrderResponseDto> response = orderService.searchOrdersForOwner(searchQuery, pageRequest);
+		return new SuccessResponseDto<>("주문 목록 조회 (점주)에 성공했습니다.", response);
 	}
 
-	@GetMapping
-	public ResponseEntity<SuccessResponseDto<List<Order>>> getAllOrders() {
-		List<Order> orders = orderService.getAllOrders();
-		return ResponseEntity.ok(new SuccessResponseDto<>("모든 주문을 성공적으로 조회했습니다.", orders));
+	// 주문 목록 조회 (소비자)
+	@GetMapping("/consumer/orders")
+	public SuccessResponseDto<Page<OrderResponseDto>> getOrderListByConsumer(
+		@RequestParam(required = false) String sortBy,
+		@RequestParam(defaultValue = "asc") String direction,
+		@RequestParam(defaultValue = "0") int page,
+		@RequestParam(defaultValue = "10") int size,
+		@RequestParam(required = false) String searchQuery
+	) {
+		PageRequest pageRequest = PageRequest.of(page, Math.min(size, 50),
+			Sort.by(Sort.Direction.fromString(direction), sortBy != null ? sortBy : "createdAt"));
+		Page<OrderResponseDto> response = orderService.searchOrdersForConsumer(searchQuery, pageRequest);
+		return new SuccessResponseDto<>("주문 목록 조회 (소비자)에 성공했습니다.", response);
 	}
 
-	@PatchMapping("/{orderId}/status")
-	public ResponseEntity<SuccessResponseDto<Void>> updateOrderStatus(@PathVariable UUID orderId,
-		@RequestParam OrderStatus status) {
-		orderService.updateOrderStatus(orderId, status);
-		return ResponseEntity.ok(new SuccessResponseDto<>("주문 상태가 성공적으로 업데이트되었습니다.", null));
+	// 주문 상태 변경 (주문 상태는 사장님만 변경 가능)
+	@PatchMapping("/orders/{orderId}")
+	public SuccessResponseDto<OrderResponseDto> updateOrderStatus(@PathVariable UUID orderId,
+		@RequestBody OrderStatusUpdateDto request, @RequestParam String username) {
+		OrderResponseDto response = orderService.updateOrderStatus(orderId, request.getStatus(), username);
+		return new SuccessResponseDto<>("주문 상태가 변경되었습니다.", response);
 	}
 
-	@DeleteMapping("/{orderId}")
-	public ResponseEntity<SuccessResponseDto<Void>> deleteOrder(@PathVariable UUID orderId) {
-		orderService.cancelOrder(orderId);
-		return ResponseEntity.ok(new SuccessResponseDto<>("주문이 성공적으로 취소되었습니다.", null));
-
+	// 주문 취소 (5분 이내에만 가능)
+	@DeleteMapping("/orders/{orderId}")
+	public SuccessResponseDto<Boolean> cancelOrder(@PathVariable UUID orderId, @RequestParam String username) {
+		orderService.cancelOrder(orderId, username);
+		return new SuccessResponseDto<>("주문이 취소되었습니다.", true);
 	}
 }
