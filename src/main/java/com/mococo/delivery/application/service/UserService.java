@@ -158,6 +158,11 @@ public class UserService {
 		return userRepository.findByUsername(username).isPresent();
 	}
 
+	public UserRole getUserRole(String username) {
+		return userRepository.findByUsername(username)
+			.orElseThrow(UserNotFoundException::new).getRole();
+	}
+
 	private void setAuthorities(HttpServletResponse response, User user) {
 		String token = createToken(user);
 		response.setHeader("Authorization", token);
