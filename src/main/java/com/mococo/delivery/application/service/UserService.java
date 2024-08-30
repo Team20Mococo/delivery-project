@@ -133,8 +133,11 @@ public class UserService {
 		return userRepository.save(
 			User.builder()
 				.username(request.getUsername())
+				.nickname(request.getNickname())
+				.email(request.getEmail())
+				.address(request.getAddress())
 				.password(passwordEncoder.encode(request.getPassword()))
-				.isPublic(request.getIsPublic())
+				.isPublic(true)
 				.role(UserRole.ROLE_CUSTOMER)
 				.build()
 		).isPresent();
