@@ -61,12 +61,25 @@ public class Order extends Auditable {
 	@Column(nullable = false)
 	private OrderStatus orderStatus;
 
+	// These fields already exist in Auditable, but we will add them here for setter access
+	private LocalDateTime createdAt;
+	private LocalDateTime deletedAt;
+	private String deletedBy;
+
 	public void setOrderStatus(OrderStatus orderStatus) {
 		this.orderStatus = orderStatus;
 	}
 
 	public Order withCreatedAt(LocalDateTime createdAt) {
-		this.setCreatedAt(createdAt);
+		this.createdAt = createdAt;
 		return this;
+	}
+
+	public void setDeletedAt(LocalDateTime deletedAt) {
+		this.deletedAt = deletedAt;
+	}
+
+	public void setDeletedBy(String deletedBy) {
+		this.deletedBy = deletedBy;
 	}
 }
