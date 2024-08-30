@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.mococo.delivery.domain.exception.business.BusinessException;
+import com.mococo.delivery.domain.exception.entity.EntityException;
 import com.mococo.delivery.domain.exception.enumtype.EnumTypeException;
 
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +19,7 @@ public class GlobalExceptionHandler {
 	 */
 	@ExceptionHandler(EnumTypeException.class)
 	protected ResponseEntity<ExceptionResponse> handleEnumTypeBinding(EnumTypeException error) {
-		log.error("HANDLE ERROR - {}", error.toString());
+		log.error("Enum ERROR - {}", error.toString());
 		ExceptionResponse exceptionResponse = ExceptionResponse.from(error);
 		return new ResponseEntity<>(exceptionResponse, exceptionResponse.getStatus());
 	}
@@ -27,8 +28,17 @@ public class GlobalExceptionHandler {
 	 * Business Exception
 	 */
 	@ExceptionHandler(BusinessException.class)
-	protected ResponseEntity<ExceptionResponse> handleEntityNotFound(BusinessException error) {
-		log.error("HANDLE ERROR - {}", error.toString());
+	protected ResponseEntity<ExceptionResponse> handleBusiness(BusinessException error) {
+		log.error("Business ERROR - {}", error.toString());
+		ExceptionResponse exceptionResponse = ExceptionResponse.from(error);
+		return new ResponseEntity<>(exceptionResponse, exceptionResponse.getStatus());
+	}
+	/**
+	 * Business Exception
+	 */
+	@ExceptionHandler(EntityException.class)
+	protected ResponseEntity<ExceptionResponse> handleEntityNotFound(EntityException error) {
+		log.error("Entity ERROR - {}", error.toString());
 		ExceptionResponse exceptionResponse = ExceptionResponse.from(error);
 		return new ResponseEntity<>(exceptionResponse, exceptionResponse.getStatus());
 	}

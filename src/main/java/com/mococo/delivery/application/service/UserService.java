@@ -26,6 +26,8 @@ import com.mococo.delivery.application.dto.user.UserListResponseDto;
 import com.mococo.delivery.application.dto.user.UserPutRequestDto;
 import com.mococo.delivery.application.dto.user.UserResponseDto;
 import com.mococo.delivery.application.dto.user.UserRolePatchRequestDto;
+import com.mococo.delivery.domain.exception.entity.PasswordNotMatchedException;
+import com.mococo.delivery.domain.exception.entity.UserNotFoundException;
 import com.mococo.delivery.domain.model.User;
 import com.mococo.delivery.domain.model.enumeration.UserRole;
 import com.mococo.delivery.domain.repository.UserRepository;
@@ -142,14 +144,14 @@ public class UserService {
 
 		String password = request.getPassword();
 		User user = userRepository.findByUsername(request.getUsername())
-			.orElseThrow(EntityNotFoundException::new);
+			.orElseThrow(UserNotFoundException::new);
 
 		//넘겨 받은 패스워드를 암호화 했을때 기존 DB 데이터 일치
-		if (passwordEncoder.matches(password, user.getPassword())) {
-			setAuthorities(response, user);
-			return true;
+		if (!passwordEncoder.matches(password, user.getPassword())) {
+			throw new PasswordNotMatchedException();
 		}
-		return false;
+		setAuthorities(response, user);
+		return true;
 	}
 
 	public boolean verifyUser(String username) {
