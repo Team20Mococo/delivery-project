@@ -12,6 +12,8 @@ import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -113,6 +115,7 @@ public class UserService {
 	}
 
 	@Transactional
+	@CacheEvict(cacheNames = "userRole", key = "args[0]")
 	public UserResponseDto updateRole(String username, UserRolePatchRequestDto requestDto) {
 		User user = userRepository.findByUsername(username)
 			.orElseThrow(UserNotFoundException::new);
@@ -157,10 +160,12 @@ public class UserService {
 		return true;
 	}
 
+	@Cacheable(cacheNames = "userVerify", key = "args[0]")
 	public boolean verifyUser(String username) {
 		return userRepository.findByUsername(username).isPresent();
 	}
 
+	@Cacheable(cacheNames = "userRole", key = "args[0]")
 	public UserRole getUserRole(String username) {
 		return userRepository.findByUsername(username)
 			.orElseThrow(UserNotFoundException::new).getRole();
