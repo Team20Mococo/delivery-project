@@ -4,6 +4,7 @@ import java.util.UUID;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -16,6 +17,7 @@ import com.mococo.delivery.application.dto.store.AddStoreResponseDto;
 import com.mococo.delivery.application.dto.store.StoreListResponseDto;
 import com.mococo.delivery.application.dto.store.StoreRequestDto;
 import com.mococo.delivery.application.dto.store.StoreResponseDto;
+import com.mococo.delivery.application.dto.store.UpdateStoreStatusRequestDto;
 import com.mococo.delivery.application.service.StoreService;
 
 import lombok.RequiredArgsConstructor;
@@ -51,4 +53,14 @@ public class StoreController {
 		StoreResponseDto response = storeService.deleteStore(storeId);
 		return new SuccessResponseDto<>("폐업 신청에 성공했습니다.", response);
 	}
+
+	@PatchMapping("/owner/stores/{storeId}/operation-status")
+	public SuccessResponseDto<StoreResponseDto> updateStoreStatus(
+		@PathVariable UUID storeId,
+		@RequestBody UpdateStoreStatusRequestDto requestDto
+	) {
+		StoreResponseDto response = storeService.updateStoreStatus(storeId, requestDto);
+		return new SuccessResponseDto<>("가게 운영 상태 변경에 성공했습니다.", response);
+	}
+
 }

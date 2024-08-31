@@ -24,6 +24,7 @@ import com.mococo.delivery.application.dto.store.StoreListResponseDto;
 import com.mococo.delivery.application.dto.store.StoreRequestDto;
 import com.mococo.delivery.application.dto.store.StoreResponseDto;
 import com.mococo.delivery.application.dto.store.StoreSimpleResponseDto;
+import com.mococo.delivery.application.dto.store.UpdateStoreStatusRequestDto;
 import com.mococo.delivery.application.service.AuditorAwareImpl;
 import com.mococo.delivery.application.service.StoreService;
 import com.mococo.delivery.domain.exception.entity.StoreAlreadyDeletedException;
@@ -365,8 +366,57 @@ public class StoreServiceTest {
 		UnauthorizedStoreAccessException exception = assertThrows(UnauthorizedStoreAccessException.class,
 			() -> storeService.deleteStore(store1.getId()));
 
-		assertEquals("스토어의 소유자만 삭제할 수 있습니다.", exception.getMessage());
+		assertEquals("스토어의 소유자만 접근할 수 있습니다.", exception.getMessage());
 		verify(storeRepository, times(1)).findById(store1.getId());
+		verify(storeRepository, never()).save(any(Store.class));
+	}
+
+	@Test
+	void updateStoreStatus_success() {
+		// Given
+		UpdateStoreStatusRequestDto requestDto = new UpdateStoreStatusRequestDto(false);
+		when(storeRepository.findById(store1.getId())).thenReturn(Optional.of(store1));
+		when(storeRepository.save(any(Store.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+		// When
+		storeService.updateStoreStatus(store1.getId(), requestDto);
+
+		// Then
+		assertFalse(store1.getOperationStatus());
+		verify(storeRepository, times(1)).findById(store1.getId());
+		verify(storeRepository, times(1)).save(store1);
+	}
+
+	@Test
+	void updateStoreStatus_notOwner_throwsException() {
+		// Given
+		UpdateStoreStatusRequestDto requestDto = new UpdateStoreStatusRequestDto(false);
+		when(storeRepository.findById(store1.getId())).thenReturn(Optional.of(store1));
+		when(auditorAware.getCurrentAuditor()).thenReturn(Optional.of("anotherUser"));
+
+		// When & Then
+		UnauthorizedStoreAccessException exception = assertThrows(UnauthorizedStoreAccessException.class,
+			() -> storeService.updateStoreStatus(store1.getId(), requestDto));
+
+		assertEquals("스토어의 소유자만 접근할 수 있습니다.", exception.getMessage());
+		verify(storeRepository, times(1)).findById(store1.getId());
+		verify(storeRepository, never()).save(any(Store.class));
+	}
+
+	@Test
+	void updateStoreStatus_invalidId_throwsException() {
+		// Given
+		UUID invalidId = UUID.randomUUID();
+		UpdateStoreStatusRequestDto requestDto = new UpdateStoreStatusRequestDto(false);
+		when(storeRepository.findById(invalidId)).thenReturn(Optional.empty());
+
+		// When & Then
+		StoreNotFoundException exception = assertThrows(StoreNotFoundException.class, () -> {
+			storeService.updateStoreStatus(invalidId, requestDto);
+		});
+
+		assertEquals("유효하지 않은 스토어 ID입니다.", exception.getMessage());
+		verify(storeRepository, times(1)).findById(invalidId);
 		verify(storeRepository, never()).save(any(Store.class));
 	}
 }

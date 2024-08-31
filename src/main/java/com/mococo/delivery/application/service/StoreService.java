@@ -18,6 +18,7 @@ import com.mococo.delivery.application.dto.store.StoreListResponseDto;
 import com.mococo.delivery.application.dto.store.StoreRequestDto;
 import com.mococo.delivery.application.dto.store.StoreResponseDto;
 import com.mococo.delivery.application.dto.store.StoreSimpleResponseDto;
+import com.mococo.delivery.application.dto.store.UpdateStoreStatusRequestDto;
 import com.mococo.delivery.domain.exception.entity.StoreAlreadyDeletedException;
 import com.mococo.delivery.domain.exception.entity.StoreNotFoundException;
 import com.mococo.delivery.domain.exception.entity.UnauthorizedStoreAccessException;
@@ -162,6 +163,36 @@ public class StoreService {
 		}
 
 		store.softDelete(currentUser);
+		Store savedStore = storeRepository.save(store);
+
+		return StoreResponseDto.builder()
+			.storeId(savedStore.getId())
+			.username(savedStore.getOwner().getUsername())
+			.name(savedStore.getName())
+			.category(savedStore.getCategory().getName())
+			.notice(savedStore.getNotice())
+			.description(savedStore.getDescription())
+			.createdAt(savedStore.getCreatedAt())
+			.createdBy(savedStore.getCreatedBy())
+			.updatedAt(savedStore.getUpdatedAt())
+			.updatedBy(savedStore.getUpdatedBy())
+			.deletedAt(savedStore.getDeletedAt())
+			.deletedBy(savedStore.getDeletedBy())
+			.build();
+	}
+
+	@Transactional
+	public StoreResponseDto updateStoreStatus(UUID storeId, UpdateStoreStatusRequestDto requestDto) {
+		Store store = storeRepository.findById(storeId)
+			.orElseThrow(StoreNotFoundException::new);
+
+		String currentUser = auditorAware.getCurrentAuditor().orElse("system");
+
+		if (!store.getOwner().getUsername().equals(currentUser)) {
+			throw new UnauthorizedStoreAccessException();
+		}
+
+		store.updateOperatingStatus(requestDto.getIsOperating());
 		Store savedStore = storeRepository.save(store);
 
 		return StoreResponseDto.builder()
