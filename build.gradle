@@ -24,6 +24,8 @@ repositories {
 }
 
 dependencies {
+    //redis 의존성
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     //인증 위한 의존성
     implementation 'io.jsonwebtoken:jjwt:0.12.6'
     implementation 'org.springframework.security:spring-security-crypto'
