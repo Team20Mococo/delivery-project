@@ -1,9 +1,13 @@
 package com.mococo.delivery.domain.model;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
+
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -21,6 +25,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "p_stores")
+@EntityListeners(AuditingEntityListener.class)
 public class Store extends Auditable {
 
 	@Id
@@ -45,4 +50,14 @@ public class Store extends Auditable {
 	@ManyToOne
 	@JoinColumn(name = "category", nullable = false)
 	private Category category;
+
+	public void softDelete(String userId) {
+		this.deletedAt = LocalDateTime.now();
+		this.deletedBy = userId;
+	}
+
+	public boolean isDeleted() {
+		return this.deletedAt != null;
+	}
+
 }
