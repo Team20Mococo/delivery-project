@@ -22,6 +22,7 @@ import org.springframework.data.domain.Sort;
 import com.mococo.delivery.application.dto.store.AddStoreResponseDto;
 import com.mococo.delivery.application.dto.store.StoreListResponseDto;
 import com.mococo.delivery.application.dto.store.StoreRequestDto;
+import com.mococo.delivery.application.dto.store.StoreResponseDto;
 import com.mococo.delivery.application.dto.store.StoreSimpleResponseDto;
 import com.mococo.delivery.application.service.AuditorAwareImpl;
 import com.mococo.delivery.application.service.StoreService;
@@ -87,6 +88,8 @@ public class StoreServiceTest {
 			.owner(owner)
 			.description("눈물나도록 맛있는 맛.")
 			.build();
+
+		when(auditorAware.getCurrentAuditor()).thenReturn(Optional.of("testuser"));
 	}
 
 	@Test
@@ -307,21 +310,24 @@ public class StoreServiceTest {
 	void deleteStore_success() {
 		// Given
 		when(storeRepository.findById(store1.getId())).thenReturn(Optional.of(store1));
-		when(auditorAware.getCurrentAuditor()).thenReturn(Optional.of("testuser"));
+		when(storeRepository.save(any(Store.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
 		// When
-		storeService.deleteStore(store1.getId());
+		StoreResponseDto response = storeService.deleteStore(store1.getId());
 
 		// Then
-		assertNotNull(store1.getDeletedAt()); // deletedAt이 null이 아닌지 확인
-		assertNotNull(store1.getDeletedBy()); // deletedBy도 null이 아닌지 확인
-		assertEquals(store1.getOwner().getUsername(), store1.getDeletedBy()); // 삭제한 사용자가 올바른지 확인
+		assertNotNull(response);
+		assertNotNull(response.getDeletedAt());
+		assertNotNull(response.getDeletedBy());
+		assertEquals(store1.getOwner().getUsername(), response.getDeletedBy());
+		verify(storeRepository, times(1)).findById(store1.getId());
+		verify(storeRepository, times(1)).save(store1);
 	}
 
 	@Test
 	void deleteStore_alreadyDeleted_throwsException() {
 		// Given
-		store1.softDelete(store1.getOwner().getUsername());
+		store1.softDelete("testuser");
 		when(storeRepository.findById(store1.getId())).thenReturn(Optional.of(store1));
 
 		// When & Then
@@ -362,21 +368,5 @@ public class StoreServiceTest {
 		assertEquals("스토어의 소유자만 삭제할 수 있습니다.", exception.getMessage());
 		verify(storeRepository, times(1)).findById(store1.getId());
 		verify(storeRepository, never()).save(any(Store.class));
-	}
-
-	@Test
-	void deleteStore_notOwner_failure() {
-		// Given
-		when(storeRepository.findById(store1.getId())).thenReturn(Optional.of(store1));
-
-		// Mock 현재 사용자를 소유자가 아닌 다른 사용자로 설정
-		when(auditorAware.getCurrentAuditor()).thenReturn(Optional.of("anotherUser"));
-
-		// When & Then
-		UnauthorizedStoreAccessException exception = assertThrows(UnauthorizedStoreAccessException.class, () -> {
-			storeService.deleteStore(store1.getId());
-		});
-
-		assertEquals("스토어의 소유자만 삭제할 수 있습니다.", exception.getMessage());
 	}
 }

@@ -15,6 +15,7 @@ import com.mococo.delivery.application.dto.SuccessResponseDto;
 import com.mococo.delivery.application.dto.store.AddStoreResponseDto;
 import com.mococo.delivery.application.dto.store.StoreListResponseDto;
 import com.mococo.delivery.application.dto.store.StoreRequestDto;
+import com.mococo.delivery.application.dto.store.StoreResponseDto;
 import com.mococo.delivery.application.service.StoreService;
 
 import lombok.RequiredArgsConstructor;
@@ -46,8 +47,8 @@ public class StoreController {
 	}
 
 	@DeleteMapping("/owner/stores/{storeId}")
-	public SuccessResponseDto<Void> deleteStore(@PathVariable UUID storeId) {
-		storeService.deleteStore(storeId);
-		return new SuccessResponseDto<>("성공했습니다.", null);
+	public SuccessResponseDto<StoreResponseDto> deleteStore(@PathVariable UUID storeId) {
+		StoreResponseDto response = storeService.deleteStore(storeId);
+		return new SuccessResponseDto<>("폐업 신청에 성공했습니다.", response);
 	}
 }
