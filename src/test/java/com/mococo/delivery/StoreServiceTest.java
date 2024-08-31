@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import com.mococo.delivery.application.dto.store.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -20,7 +19,15 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
+import com.mococo.delivery.application.dto.store.AddStoreResponseDto;
+import com.mococo.delivery.application.dto.store.StoreListResponseDto;
+import com.mococo.delivery.application.dto.store.StoreRequestDto;
+import com.mococo.delivery.application.dto.store.StoreSimpleResponseDto;
+import com.mococo.delivery.application.service.AuditorAwareImpl;
 import com.mococo.delivery.application.service.StoreService;
+import com.mococo.delivery.domain.exception.entity.StoreAlreadyDeletedException;
+import com.mococo.delivery.domain.exception.entity.StoreNotFoundException;
+import com.mococo.delivery.domain.exception.entity.UnauthorizedStoreAccessException;
 import com.mococo.delivery.domain.model.Category;
 import com.mococo.delivery.domain.model.Store;
 import com.mococo.delivery.domain.model.User;
@@ -35,6 +42,9 @@ public class StoreServiceTest {
 
 	@Mock
 	private UserRepository userRepository;
+
+	@Mock
+	private AuditorAwareImpl auditorAware;
 
 	@Mock
 	private CategoryRepository categoryRepository;
@@ -291,5 +301,82 @@ public class StoreServiceTest {
 		assertEquals("김밥천국", firstStore.getName());
 
 		verify(storeRepository, times(1)).findByNameContainingIgnoreCaseAndOperationStatusTrue("김밥", pageable);
+	}
+
+	@Test
+	void deleteStore_success() {
+		// Given
+		when(storeRepository.findById(store1.getId())).thenReturn(Optional.of(store1));
+		when(auditorAware.getCurrentAuditor()).thenReturn(Optional.of("testuser"));
+
+		// When
+		storeService.deleteStore(store1.getId());
+
+		// Then
+		assertNotNull(store1.getDeletedAt()); // deletedAt이 null이 아닌지 확인
+		assertNotNull(store1.getDeletedBy()); // deletedBy도 null이 아닌지 확인
+		assertEquals(store1.getOwner().getUsername(), store1.getDeletedBy()); // 삭제한 사용자가 올바른지 확인
+	}
+
+	@Test
+	void deleteStore_alreadyDeleted_throwsException() {
+		// Given
+		store1.softDelete(store1.getOwner().getUsername());
+		when(storeRepository.findById(store1.getId())).thenReturn(Optional.of(store1));
+
+		// When & Then
+		StoreAlreadyDeletedException exception = assertThrows(StoreAlreadyDeletedException.class,
+			() -> storeService.deleteStore(store1.getId()));
+
+		assertEquals("이미 삭제된 스토어입니다.", exception.getMessage());
+		verify(storeRepository, times(1)).findById(store1.getId());
+		verify(storeRepository, never()).save(any(Store.class));
+	}
+
+	@Test
+	void deleteStore_invalidId_throwsException() {
+		// Given
+		UUID invalidId = UUID.randomUUID();
+		when(storeRepository.findById(invalidId)).thenReturn(Optional.empty());
+
+		// When & Then
+		StoreNotFoundException exception = assertThrows(StoreNotFoundException.class, () -> {
+			storeService.deleteStore(invalidId);
+		});
+
+		assertEquals("유효하지 않은 스토어 ID입니다.", exception.getMessage());
+		verify(storeRepository, times(1)).findById(invalidId);
+		verify(storeRepository, never()).save(any(Store.class));
+	}
+
+	@Test
+	void deleteStore_notOwner_throwsException() {
+		// Given
+		when(storeRepository.findById(store1.getId())).thenReturn(Optional.of(store1));
+		when(auditorAware.getCurrentAuditor()).thenReturn(Optional.of("anotherUser"));
+
+		// When & Then
+		UnauthorizedStoreAccessException exception = assertThrows(UnauthorizedStoreAccessException.class,
+			() -> storeService.deleteStore(store1.getId()));
+
+		assertEquals("스토어의 소유자만 삭제할 수 있습니다.", exception.getMessage());
+		verify(storeRepository, times(1)).findById(store1.getId());
+		verify(storeRepository, never()).save(any(Store.class));
+	}
+
+	@Test
+	void deleteStore_notOwner_failure() {
+		// Given
+		when(storeRepository.findById(store1.getId())).thenReturn(Optional.of(store1));
+
+		// Mock 현재 사용자를 소유자가 아닌 다른 사용자로 설정
+		when(auditorAware.getCurrentAuditor()).thenReturn(Optional.of("anotherUser"));
+
+		// When & Then
+		UnauthorizedStoreAccessException exception = assertThrows(UnauthorizedStoreAccessException.class, () -> {
+			storeService.deleteStore(store1.getId());
+		});
+
+		assertEquals("스토어의 소유자만 삭제할 수 있습니다.", exception.getMessage());
 	}
 }

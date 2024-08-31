@@ -10,6 +10,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.mococo.delivery.application.dto.PageInfoDto;
 import com.mococo.delivery.application.dto.store.AddStoreResponseDto;
@@ -17,6 +18,9 @@ import com.mococo.delivery.application.dto.store.StoreListResponseDto;
 import com.mococo.delivery.application.dto.store.StoreRequestDto;
 import com.mococo.delivery.application.dto.store.StoreResponseDto;
 import com.mococo.delivery.application.dto.store.StoreSimpleResponseDto;
+import com.mococo.delivery.domain.exception.entity.StoreAlreadyDeletedException;
+import com.mococo.delivery.domain.exception.entity.StoreNotFoundException;
+import com.mococo.delivery.domain.exception.entity.UnauthorizedStoreAccessException;
 import com.mococo.delivery.domain.model.Category;
 import com.mococo.delivery.domain.model.Store;
 import com.mococo.delivery.domain.model.User;
@@ -32,6 +36,7 @@ public class StoreService {
 	private final StoreRepository storeRepository;
 	private final UserRepository userRepository;
 	private final CategoryRepository categoryRepository;
+	private final AuditorAwareImpl auditorAware;
 
 	public Store getStore(UUID storeId) {
 		return storeRepository.findById(storeId).orElse(null);
@@ -138,5 +143,25 @@ public class StoreService {
 			.storeList(storeList)
 			.pageInfo(pageInfo)
 			.build();
+	}
+
+	@Transactional
+	public void deleteStore(UUID storeId) {
+		Store store = storeRepository.findById(storeId)
+			.orElseThrow(StoreNotFoundException::new);
+
+		if (store.isDeleted()) {
+			throw new StoreAlreadyDeletedException();
+		}
+
+		String currentUser = auditorAware.getCurrentAuditor().orElse("system");
+
+		// 현재 사용자가 스토어의 소유자인지 확인
+		if (!store.getOwner().getUsername().equals(currentUser)) {
+			throw new UnauthorizedStoreAccessException();
+		}
+
+		store.softDelete(currentUser);
+		storeRepository.save(store);
 	}
 }
