@@ -5,6 +5,8 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import com.mococo.delivery.domain.exception.BaseException;
+import com.mococo.delivery.domain.exception.ExceptionStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -209,5 +211,26 @@ public class StoreService {
 			.deletedAt(savedStore.getDeletedAt())
 			.deletedBy(savedStore.getDeletedBy())
 			.build();
+	}
+
+	@Transactional(readOnly = true)
+	public StoreResponseDto getOneStore(UUID storeId) {
+		Store store = storeRepository.findById(storeId)
+				.orElseThrow(() -> new BaseException(ExceptionStatus.STORE_NOT_FOUND));
+
+		return StoreResponseDto.builder()
+				.storeId(store.getId())
+				.username(store.getOwner().getUsername())
+				.name(store.getName())
+				.category(store.getCategory().getName())
+				.notice(store.getNotice())
+				.description(store.getDescription())
+				.createdAt(store.getCreatedAt())
+				.createdBy(store.getCreatedBy())
+				.updatedAt(store.getUpdatedAt())
+				.updatedBy(store.getUpdatedBy())
+				.deletedAt(store.getDeletedAt())
+				.deletedBy(store.getDeletedBy())
+				.build();
 	}
 }
