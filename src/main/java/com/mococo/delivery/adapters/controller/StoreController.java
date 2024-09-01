@@ -63,4 +63,10 @@ public class StoreController {
 		return new SuccessResponseDto<>("가게 운영 상태 변경에 성공했습니다.", response);
 	}
 
+	@GetMapping("/admin/stores/{storeId}")
+	public SuccessResponseDto<StoreResponseDto> getStore(@PathVariable UUID storeId) {
+		StoreResponseDto response = storeService.getOneStore(storeId);
+		return new SuccessResponseDto<>("스토어 단건 조회에 성공했습니다.", response);
+	}
+
 }
