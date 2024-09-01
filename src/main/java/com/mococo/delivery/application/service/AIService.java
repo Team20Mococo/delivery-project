@@ -1,6 +1,15 @@
 package com.mococo.delivery.application.service;
 
+import com.mococo.delivery.application.dto.PageInfoDto;
+import com.mococo.delivery.application.dto.ai.AIListResponseDto;
+import com.mococo.delivery.application.dto.ai.AIReportResponseDto;
+import com.mococo.delivery.application.dto.product.ProductSimpleResponseDto;
+import com.mococo.delivery.domain.model.Product;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -20,6 +29,9 @@ import com.mococo.delivery.domain.repository.AIReportRepository;
 import com.mococo.delivery.domain.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -82,5 +94,42 @@ public class AIService {
 		} catch (Exception e) {
 			throw new RuntimeException("AI 응답을 처리하는 중 오류가 발생했습니다.", e);
 		}
+	}
+
+	@Transactional(readOnly = true)
+	public AIListResponseDto getAllAIReports(String sortBy, String direction,
+											 int page, int size, String searchQuery) {
+		Sort sort = Sort.by(direction.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC,
+				sortBy != null ? sortBy : "createdAt");
+
+		Pageable pageable = PageRequest.of(page, size, sort);
+		Page<AIReport> reportsPage;
+
+		if (searchQuery != null && !searchQuery.isEmpty()) {
+			reportsPage = aiReportRepository.findByQuestionContainingIgnoreCase(searchQuery, pageable);
+		} else {
+			reportsPage = aiReportRepository.findAll(pageable);
+		}
+
+		List<AIReportResponseDto> productList = reportsPage.getContent().stream()
+				.map(aiReport -> AIReportResponseDto.builder()
+						.question(aiReport.getQuestion())
+						.result(aiReport.getResult())
+						.createdAt(aiReport.getCreatedAt())
+						.createdBy(aiReport.getUser().getUsername())
+						.build()).toList();
+
+		PageInfoDto pageInfo = PageInfoDto.builder()
+				.totalItems(reportsPage.getTotalElements())
+				.totalPages(reportsPage.getTotalPages())
+				.currentPage(reportsPage.getNumber())
+				.pageSize(reportsPage.getSize())
+				.hasNextPage(reportsPage.hasNext())
+				.build();
+
+		return AIListResponseDto.builder()
+				.aiList(productList)
+				.pageInfo(pageInfo)
+				.build();
 	}
 }
