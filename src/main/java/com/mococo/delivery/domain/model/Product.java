@@ -40,4 +40,13 @@ public class Product extends Auditable {
 	@JoinColumn(name = "store_id", nullable = false)
 	private Store store;
 
+	public void softDelete(String userId) {
+		this.deletedAt = LocalDateTime.now();
+		this.deletedBy = userId;
+	}
+
+	public boolean isDeleted() {
+		return this.deletedAt != null;
+	}
+
 }

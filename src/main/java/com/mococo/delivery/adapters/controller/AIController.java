@@ -32,7 +32,7 @@ public class AIController {
 			@RequestParam(required = false) String searchQuery
 	) {
 		AIListResponseDto response = aiService.getAllAIReports(sortBy, direction, page, size, searchQuery);
-		return new SuccessResponseDto<>("", response);
+		return new SuccessResponseDto<>("ai 답변 리스트 조회에 성공했습니다", response);
 	}
 
 }
