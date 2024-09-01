@@ -2,6 +2,7 @@ package com.mococo.delivery.adapters.controller;
 
 import java.util.UUID;
 
+import com.mococo.delivery.domain.model.enumeration.UserRole;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -69,4 +70,29 @@ public class StoreController {
 		return new SuccessResponseDto<>("스토어 단건 조회에 성공했습니다.", response);
 	}
 
+	@GetMapping("/customer/stores")
+	public SuccessResponseDto<StoreListResponseDto> getStoreListByCustomer(
+			@RequestParam(required = false) String sortBy,
+			@RequestParam(defaultValue = "asc") String direction,
+			@RequestParam(required = false) boolean filter,
+			@RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "10") int size,
+			@RequestParam(required = false) String searchQuery
+	) {
+		StoreListResponseDto response = storeService.getStores(UserRole.ROLE_CUSTOMER, sortBy, direction, filter, page, size, searchQuery);
+		return new SuccessResponseDto<>("가게 목록 조회에 성공했습니다.", response);
+	}
+
+	@GetMapping("/owner/stores")
+	public SuccessResponseDto<StoreListResponseDto> getStoreListByOwner(
+			@RequestParam(required = false) String sortBy,
+			@RequestParam(defaultValue = "asc") String direction,
+			@RequestParam(required = false) boolean filter,
+			@RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "10") int size,
+			@RequestParam(required = false) String searchQuery
+	) {
+		StoreListResponseDto response = storeService.getStores(UserRole.ROLE_OWNER, sortBy, direction, filter, page, size, searchQuery);
+		return new SuccessResponseDto<>("내 가게 조회에 성공했습니다.", response);
+	}
 }
