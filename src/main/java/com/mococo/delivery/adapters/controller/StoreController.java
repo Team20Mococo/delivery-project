@@ -2,6 +2,7 @@ package com.mococo.delivery.adapters.controller;
 
 import java.util.UUID;
 
+import com.mococo.delivery.domain.model.enumeration.UserRole;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -69,4 +70,21 @@ public class StoreController {
 		return new SuccessResponseDto<>("스토어 단건 조회에 성공했습니다.", response);
 	}
 
+	@GetMapping("/customer/stores")
+	public SuccessResponseDto<StoreListResponseDto> getStoreListByCustomer(
+			@RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "10") int size
+	) {
+		StoreListResponseDto response = storeService.getStores(UserRole.ROLE_CUSTOMER, page, size);
+		return new SuccessResponseDto<>("가게 목록 조회에 성공했습니다.", response);
+	}
+
+	@GetMapping("/owner/stores")
+	public SuccessResponseDto<StoreListResponseDto> getStoreListByOwner(
+			@RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "10") int size
+	) {
+		StoreListResponseDto response = storeService.getStores(UserRole.ROLE_OWNER, page, size);
+		return new SuccessResponseDto<>("내 가게 조회에 성공했습니다.", response);
+	}
 }

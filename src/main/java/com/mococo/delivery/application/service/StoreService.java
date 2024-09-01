@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import com.mococo.delivery.domain.exception.BaseException;
 import com.mococo.delivery.domain.exception.ExceptionStatus;
+import com.mococo.delivery.domain.model.enumeration.UserRole;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -231,6 +232,41 @@ public class StoreService {
 				.updatedBy(store.getUpdatedBy())
 				.deletedAt(store.getDeletedAt())
 				.deletedBy(store.getDeletedBy())
+				.build();
+	}
+
+	@Transactional(readOnly = true)
+	public StoreListResponseDto getStores(UserRole role, int page, int size) {
+		String currentUsername = auditorAware.getCurrentAuditor()
+				.orElseThrow();
+
+		Pageable pageable = PageRequest.of(page, size);
+
+		Page<Store> stores = switch (role) {
+			case ROLE_CUSTOMER -> storeRepository.findByOperationStatusTrue(pageable);
+			case ROLE_OWNER -> storeRepository.findByOwnerUsername(currentUsername, pageable);
+			default -> throw new BaseException(ExceptionStatus.INVALID_ROLE);
+		};
+
+		List<StoreSimpleResponseDto> storeList = stores.getContent().stream()
+				.map(store -> StoreSimpleResponseDto.builder()
+						.storeId(store.getId())
+						.name(store.getName())
+						.description(store.getDescription())
+						.build())
+				.collect(Collectors.toList());
+
+		PageInfoDto pageInfo = PageInfoDto.builder()
+				.totalPages(stores.getTotalPages())
+				.totalItems(stores.getTotalElements())
+				.currentPage(stores.getNumber())
+				.pageSize(stores.getSize())
+				.hasNextPage(stores.hasNext())
+				.build();
+
+		return StoreListResponseDto.builder()
+				.storeList(storeList)
+				.pageInfo(pageInfo)
 				.build();
 	}
 }

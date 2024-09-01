@@ -23,4 +23,6 @@ public interface StoreRepository extends Repository<Store, UUID> {
 	Page<Store> findByNameContainingIgnoreCaseAndOperationStatusTrue(String searchQuery, Pageable pageable);
 
 	Page<Store> findByNameContainingIgnoreCase(String searchQuery, Pageable pageable);
+
+	Page<Store> findByOwnerUsername(String currentUsername, Pageable pageable);
 }

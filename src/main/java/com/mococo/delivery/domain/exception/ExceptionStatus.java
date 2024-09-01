@@ -22,7 +22,9 @@ public enum ExceptionStatus {
 	STORE_ALREADY_DELETED(HttpStatus.BAD_REQUEST, "entity-004", "이미 삭제된 스토어입니다."),
 	UNAUTHORIZED_STORE_ACCESS(HttpStatus.FORBIDDEN, "entity-005", "스토어의 소유자만 접근할 수 있습니다."),
 	PRODUCT_NOT_FOUND(HttpStatus.BAD_REQUEST, "entity-006", "유효하지 않은 상품 ID입니다."),
-	PRODUCT_ALREADY_DELETED(HttpStatus.BAD_REQUEST, "entity-007,", "이미 삭제된 상품입니다.");
+	PRODUCT_ALREADY_DELETED(HttpStatus.BAD_REQUEST, "entity-007,", "이미 삭제된 상품입니다."),
+	INVALID_ROLE(HttpStatus.BAD_REQUEST, "entity-008", "유효하지 않은 역할입니다.");
+
 	private final HttpStatus httpStatus;
 	private final String exceptionCode;
 	private final String message;
