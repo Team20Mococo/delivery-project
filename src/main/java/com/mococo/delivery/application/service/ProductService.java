@@ -1,10 +1,16 @@
 package com.mococo.delivery.application.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 import com.mococo.delivery.application.dto.product.*;
+import com.mococo.delivery.application.dto.store.StoreResponseDto;
+import com.mococo.delivery.domain.exception.entity.ProductNotFoundException;
+import com.mococo.delivery.domain.exception.entity.StoreAlreadyDeletedException;
+import com.mococo.delivery.domain.exception.entity.StoreNotFoundException;
+import com.mococo.delivery.domain.exception.entity.UnauthorizedStoreAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -26,6 +32,7 @@ public class ProductService {
 
 	private final ProductRepository productRepository;
 	private final StoreRepository storeRepository;
+	private final AuditorAwareImpl auditorAware;
 
 	public ProductResponseDto addProduct(ProductRequestDto request) {
 		Store store = storeRepository.findById(request.getStoreId())
@@ -187,5 +194,27 @@ public class ProductService {
 				.createdAt(updatedProduct.getCreatedAt())
 				.createdBy(updatedProduct.getCreatedBy())
 				.build();
+	}
+
+	@Transactional
+	public String deleteProduct(UUID productId) {
+		Product product = productRepository.findById(productId)
+				.orElseThrow(ProductNotFoundException::new);
+
+		if (product.isDeleted()) {
+			throw new StoreAlreadyDeletedException();
+		}
+
+		String currentUser = auditorAware.getCurrentAuditor().orElse("system");
+
+		// 현재 사용자가 스토어의 소유자인지 확인
+		if (!product.getStore().getOwner().getUsername().equals(currentUser)) {
+			throw new UnauthorizedStoreAccessException();
+		}
+
+		product.softDelete(currentUser);
+		Product savedProduct = productRepository.save(product);
+
+		return savedProduct.getId().toString();
 	}
 }
