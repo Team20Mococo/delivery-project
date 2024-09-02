@@ -15,7 +15,7 @@ import lombok.*;
 public class DeliveryResponseDto {
 	private UUID deliveryId;
 	private UUID orderId;
-	private String address;  // 필드명을 address로 변경
+	private String address;
 	private DeliveryStatus status;
 	private LocalDateTime shippedAt;
 	private LocalDateTime deliveredAt;
