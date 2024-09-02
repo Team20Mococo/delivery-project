@@ -60,4 +60,8 @@ public class Store extends Auditable {
 		return this.deletedAt != null;
 	}
 
+	public void updateOperatingStatus(Boolean isOperating) {
+		this.operationStatus = isOperating;
+	}
+
 }

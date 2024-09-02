@@ -3,6 +3,7 @@ package com.mococo.delivery.adapters.controller;
 import java.util.UUID;
 
 import com.mococo.delivery.application.dto.product.*;
+import com.mococo.delivery.application.dto.store.StoreResponseDto;
 import org.springframework.web.bind.annotation.*;
 
 import com.mococo.delivery.application.dto.SuccessResponseDto;
@@ -76,6 +77,12 @@ public class ProductController {
 			@PathVariable UUID productId,
 			@RequestBody UpdateProductPublicStatusRequestDto request) {
 		ProductResponseDto response = productService.updateProductPublicStatus(productId, request);
+		return new SuccessResponseDto<>("성공했습니다.", response);
+	}
+
+	@DeleteMapping("/owner/products/{productId}")
+	public SuccessResponseDto<String> deleteProduct(@PathVariable UUID productId) {
+		String response = productService.deleteProduct(productId);
 		return new SuccessResponseDto<>("성공했습니다.", response);
 	}
 
