@@ -25,7 +25,7 @@ username, password에 맞게 설정 후 실행
 단, 추후 서비스 이용자 규모에 따라 확장 및  각 서비스 단위 어플리케이션으로 분리(MSA)가 용이하도록 설계
 
 ## ERD
-
+![erd](./mococo_order(4).png)
 ## 기술 스택
 
 Language : Java 17
