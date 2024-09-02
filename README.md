@@ -17,7 +17,28 @@ application-secret.yml 파일에서
 redis host = 로컬 레디스 서버
 
 username, password에 맞게 설정 후 실행
+ex)
+```yaml
+spring:
+  datasource:
+    url: jdbc:postgresql://mococo-db.cpwmww8igmtu.ap-northeast-2.rds.amazonaws.com:5432/mococo
+    password: road3144
+    driver-class-name: org.postgresql.Driver
+    username: postgres
+  data:
+    redis:
+#      host: mococo-redis.bvod2g.ng.0001.apn2.cache.amazonaws.com
+      port: 6379
+      host: localhost
+      username: default
+      password: systempass
+jwt:
+  secret:
+    key: bW9jb2NvOTc5ODk5Cm1vY29jb0Rhd29uCm1vY29jb0phZUd1Cm1vY29jb1RhZWh3YW4KbW9jb2NvIGlzIEdvZAptb2NvY28gaWRvbnQga25vdwoK
 
+GOOGLE_API_KEY: AIzaSyA4RUDl82QH1TikYuDDMn9jvlbU6pIgFn0
+
+```
 ## 프로젝트 목적/ 상세
 
 온/오프라인 주문 서비스를 만들어 보자.
